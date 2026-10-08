@@ -1,0 +1,22 @@
+Material Design Icons (MDI) by the Pictogrammers community.
+Native vector adaptation of these unmodified SVG path definitions:
+solar-power, battery-arrow-up, battery-arrow-down,
+transmission-tower-import, home-lightning-bolt.
+Navigation: solar-power, battery-heart-variant, chart-line, lan-check.
+
+Source, retrieved 2026-10-07:
+https://github.com/Templarian/MaterialDesign/tree/master/svg
+https://raw.githubusercontent.com/Templarian/MaterialDesign/master/svg/solar-power.svg
+https://raw.githubusercontent.com/Templarian/MaterialDesign/master/svg/battery-arrow-up.svg
+https://raw.githubusercontent.com/Templarian/MaterialDesign/master/svg/battery-arrow-down.svg
+https://raw.githubusercontent.com/Templarian/MaterialDesign/master/svg/transmission-tower-import.svg
+https://raw.githubusercontent.com/Templarian/MaterialDesign/master/svg/home-lightning-bolt.svg
+
+Navigation paths retrieved 2026-10-08:
+https://raw.githubusercontent.com/Templarian/MaterialDesign/master/svg/battery-heart-variant.svg
+https://raw.githubusercontent.com/Templarian/MaterialDesign/master/svg/chart-line.svg
+https://raw.githubusercontent.com/Templarian/MaterialDesign/master/svg/lan-check.svg
+
+Icons licensed under Apache License 2.0. See Apache-2.0.txt and MDI-LICENSE.txt.
+No third-party network or icon font is needed at runtime. The bundled 24x24
+paths retain the original web silhouettes; SwiftUI applies the app's colors.

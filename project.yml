@@ -1,0 +1,100 @@
+name: NamSolar
+options:
+  deploymentTarget:
+    iOS: '26.0'
+  createIntermediateGroups: true
+settings:
+  base:
+    SWIFT_VERSION: '5.0'
+    IPHONEOS_DEPLOYMENT_TARGET: '26.0'
+    CODE_SIGNING_ALLOWED: NO
+    ENABLE_USER_SCRIPT_SANDBOXING: YES
+targets:
+  NamSolar:
+    type: application
+    platform: iOS
+    sources:
+      - NamSolarApp.swift
+      - SolarAppVersion.swift
+      - SolarNavigationIcon.swift
+      - SolarCore.swift
+      - SolarBatteryPower.swift
+      - SolarHistoryPreparation.swift
+      - HAService.swift
+      - SolarStore.swift
+      - AuthenticationView.swift
+      - SolarViews.swift
+      - SolarTheme.swift
+      - SolarFlowView.swift
+      - SolarOverviewLayout.swift
+      - SolarChartModel.swift
+      - SolarHistoryChart.swift
+      - SolarChartTouchSurface.swift
+      - SolarChartRendering.swift
+      - SolarDeviceHistory.swift
+      - SolarDeviceDetailView.swift
+      - SolarPVArtwork.swift
+      - SolarMetricIcon.swift
+      - SolarEnergyModel.swift
+      - SolarEnergyStore.swift
+      - SolarEnergyService.swift
+      - SolarEnergyHistoryView.swift
+      - SolarEnergyChart.swift
+      - SolarEnergyPreview.swift
+      - SolarMetricIcon-NOTICE.txt
+      - MDI-LICENSE.txt
+      - Apache-2.0.txt
+      - Assets.xcassets
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: me.bocphot.namsolar
+        PRODUCT_NAME: NamSolar
+        INFOPLIST_FILE: Info.plist
+        TARGETED_DEVICE_FAMILY: '1'
+        ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
+        MARKETING_VERSION: '1.4.2'
+        CURRENT_PROJECT_VERSION: '13'
+        ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES: YES
+  NamSolarTests:
+    type: bundle.unit-test
+    platform: iOS
+    sources:
+      - SolarCoreTests.swift
+      - SolarBatteryPowerTests.swift
+      - SolarHistoryPreparationTests.swift
+      - SolarArtworkTests.swift
+      - SolarNavigationTests.swift
+      - SolarLayoutTests.swift
+      - SolarChartModelTests.swift
+      - SolarDeviceHistoryTests.swift
+      - SolarChartTouchTests.swift
+      - SolarMetricIconTests.swift
+      - SolarEnergyTests.swift
+    dependencies:
+      - target: NamSolar
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: me.bocphot.namsolar.tests
+        GENERATE_INFOPLIST_FILE: YES
+  NamSolarUITests:
+    type: bundle.ui-testing
+    platform: iOS
+    sources:
+      - NamSolarUITests.swift
+    dependencies:
+      - target: NamSolar
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: me.bocphot.namsolar.uitests
+        GENERATE_INFOPLIST_FILE: YES
+schemes:
+  NamSolar:
+    build:
+      targets:
+        NamSolar: all
+        NamSolarTests: [test]
+        NamSolarUITests: [test]
+    test:
+      targets:
+        - NamSolarTests
+        - NamSolarUITests
