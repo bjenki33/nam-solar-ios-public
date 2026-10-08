@@ -1,0 +1,50 @@
+name: Build Nam Solar IPA
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+permissions:
+  contents: read
+concurrency:
+  group: nam-solar-ios-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  build:
+    runs-on: macos-15
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v4
+      - name: Select Xcode with iOS 26 SDK
+        run: |
+          for app in $(find /Applications -maxdepth 1 -name 'Xcode*.app' | sort -r); do
+            export DEVELOPER_DIR="$app/Contents/Developer"
+            sdk=$(xcrun --sdk iphoneos --show-sdk-version 2>/dev/null || echo 0)
+            if [[ "${sdk%%.*}" -ge 26 ]]; then
+              echo "DEVELOPER_DIR=$DEVELOPER_DIR" >> "$GITHUB_ENV"
+              xcodebuild -version
+              exit 0
+            fi
+          done
+          echo 'No compatible Xcode installed' >&2
+          exit 1
+      - name: Test and compile IPA
+        run: bash build-ios.sh
+      - name: Upload IPA
+        uses: actions/upload-artifact@v4
+        with:
+          name: NamSolar-IPA
+          path: |
+            build/NamSolar-*-iOS26-unsigned.ipa
+            build/SHA256.txt
+          if-no-files-found: error
+          retention-days: 14
+      - name: Upload test evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: NamSolar-test-evidence
+          path: |
+            build/*.log
+            build/*.txt
+            build/screenshots
+          retention-days: 14
