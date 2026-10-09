@@ -97,7 +97,7 @@ final class HAService {
     }
 
     func history(entities: [String], hours: Int) async throws -> [HistoryPoint] {
-        let end = Date()
+        let end = Date(timeIntervalSince1970: floor(Date().timeIntervalSince1970))
         let start = end.addingTimeInterval(-Double(hours) * 3600)
         var components = URLComponents(url: SolarConfig.base.appendingPathComponent("api/history/period/" + SolarDate.iso(start)), resolvingAgainstBaseURL: false)!
         components.queryItems = [URLQueryItem(name: "filter_entity_id", value: entities.joined(separator: ",")),

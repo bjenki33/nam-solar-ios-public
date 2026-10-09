@@ -91,11 +91,11 @@ final class SolarChartTouchView: UIView, UIGestureRecognizerDelegate {
         velocity.x.isFinite && velocity.y.isFinite && abs(velocity.x) > abs(velocity.y) * 1.2
     }
 
-    func gestureRecognizerShouldBegin(_ gestureRecognizer: UIGestureRecognizer) -> Bool {
+    override func gestureRecognizerShouldBegin(_ gestureRecognizer: UIGestureRecognizer) -> Bool {
         if gestureRecognizer === panRecognizer {
             return panRecognizer.isEnabled && Self.isHorizontal(panRecognizer.velocity(in: self))
         }
-        return true
+        return super.gestureRecognizerShouldBegin(gestureRecognizer)
     }
 
     func gestureRecognizer(_ gestureRecognizer: UIGestureRecognizer,
