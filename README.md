@@ -21,6 +21,8 @@ private repository, its history and personal work journal remain private.
 
 - SOC history reads Recorder five-minute means, matching the web's data source.
   Missing/null statistic buckets stay missing; aggregate values are labelled.
+  Inspecting SOC selects a recorded bucket-end timestamp, not an interpolated
+  percentage or the next bucket's mean at the previous endpoint.
 - Raw history retains the last available state up to the actual unavailable
   boundary and the fixed request end, without inventing readings during outages.
 - A fast horizontal one-finger swipe pans a zoomed chart without changing zoom.

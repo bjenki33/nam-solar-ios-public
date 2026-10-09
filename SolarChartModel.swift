@@ -53,7 +53,10 @@ struct SolarChartModel: Sendable {
 
     func inspectionDate(at date: Date) -> Date {
         if let first = points.first, first.date == points.last?.date { return first.date }
-        return min(domain.upperBound, max(domain.lowerBound, date))
+        let clamped = min(domain.upperBound, max(domain.lowerBound, date))
+        if series.count == 1, let item = series.first, item.points.first?.aggregation != nil,
+           let point = sample(at: clamped, entity: item.entity) { return point.date }
+        return clamped
     }
 
     // Match the chart's step-end line: hold a recorded value, never interpolate
@@ -63,10 +66,14 @@ struct SolarChartModel: Sendable {
         let index = insertionIndex(in: items, date: date, afterEqual: true) - 1
         guard index >= 0 else { return nil }
         let point = items[index]
-        // A mean belongs to its recorded bucket, not to a made-up instantaneous sample.
-        if index + 1 < items.count {
+        // The web timestamps means at bucket END. Select a recorded endpoint,
+        // not the next bucket's value at the previous endpoint or an interpolated percentage.
+        if point.aggregation != nil {
+            if point.date == date, point.date != point.recordedAt { return point }
+            guard index + 1 < items.count, items[index + 1].segment == point.segment else { return nil }
             let next = items[index + 1]
-            if next.aggregation != nil, let start = next.recordedAt, date >= start, date <= next.date { return next }
+            if point.date == point.recordedAt { return next }
+            return date.timeIntervalSince(point.date) <= next.date.timeIntervalSince(date) ? point : next
         }
         guard !point.isBoundary else { return nil }
         if point.date == date { return point }

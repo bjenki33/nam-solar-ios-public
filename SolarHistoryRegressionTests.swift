@@ -102,7 +102,8 @@ final class SolarHistoryRegressionTests: XCTestCase {
         let model = SolarChartModel(points: try SolarSOCStatistics.points(buckets))
         XCTAssertEqual(Set(model.points.map(\.segment)).count, 1)
         for t in [0.0, 1000, 10799] { XCTAssertEqual(model.sample(at: date(t), entity: entity)?.value, 21) }
-        for t in [10800.0, 14400, 25199] { XCTAssertEqual(model.sample(at: date(t), entity: entity)?.value, 100) }
+        XCTAssertEqual(model.sample(at: date(10800), entity: entity)?.value, 21)
+        for t in [10951.0, 14400, 25199] { XCTAssertEqual(model.sample(at: date(t), entity: entity)?.value, 100) }
         XCTAssertNil(model.sample(at: date(25201), entity: entity))
     }
 
@@ -115,6 +116,17 @@ final class SolarHistoryRegressionTests: XCTestCase {
         XCTAssertEqual(model.sample(at: date(601), entity: entity)?.value, 30)
         XCTAssertNil(model.sample(at: date(1000), entity: entity))
         XCTAssertEqual(model.sample(at: date(1201), entity: entity)?.value, 40)
+    }
+
+    func testMeanInspectorMatchesWebBucketEndAndNeverShowsNextValueAtExactEnd() throws {
+        let model = SolarChartModel(points: try SolarSOCStatistics.points([bucket(0, 21), bucket(300, 80), bucket(600, 100)]))
+        XCTAssertEqual(model.sample(at: date(300), entity: entity)?.value, 21)
+        XCTAssertEqual(model.sample(at: date(306), entity: entity)?.value, 21)
+        XCTAssertEqual(model.inspectionDate(at: date(306)), date(300))
+        XCTAssertEqual(model.sample(at: date(590), entity: entity)?.value, 80)
+        XCTAssertEqual(model.inspectionDate(at: date(590)), date(600))
+        XCTAssertEqual(model.sample(at: date(600), entity: entity)?.value, 80)
+        XCTAssertEqual(model.sample(at: date(900), entity: entity)?.value, 100)
     }
 
     func testStatisticsSortDeduplicateAndRejectImpossibleValues() throws {

@@ -166,7 +166,7 @@ private struct SolarHistoryChart: View {
                     .foregroundStyle(.white.opacity(0.5)).lineStyle(StrokeStyle(lineWidth: 1, dash: [3, 3]))
                 ForEach(model.series) { series in
                     if let point = model.sample(at: selection, entity: series.entity) {
-                        PointMark(x: .value("Thời gian", selection), y: .value(unit, point.value))
+                        PointMark(x: .value("Thời gian", point.aggregation == nil ? selection : point.date), y: .value(unit, point.value))
                             .foregroundStyle(SolarChartStyle.color(series.entity)).symbolSize(40)
                     }
                 }
