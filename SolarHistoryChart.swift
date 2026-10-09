@@ -278,7 +278,6 @@ private struct SolarHistoryChart: View {
                 .lineLimit(1)
         }.padding(12).background(SolarTheme.ink, in: RoundedRectangle(cornerRadius: 6))
             .overlay(RoundedRectangle(cornerRadius: 6).stroke(SolarTheme.border, lineWidth: 0.7))
-            .accessibilityIdentifier("chart-inspector")
     }
 
     private func inspectorValues(at date: Date?) -> some View {
