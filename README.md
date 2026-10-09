@@ -17,7 +17,20 @@ private repository, its history and personal work journal remain private.
 - Public source reveals the server hostname and sensor identifiers. It is not
   a substitute for server-side authentication and authorization.
 
-## Version 1.4.2 (13)
+## Version 1.4.3 (14)
+
+- SOC history reads Recorder five-minute means, matching the web's data source.
+  Missing/null statistic buckets stay missing; aggregate values are labelled.
+- Raw history retains the last available state up to the actual unavailable
+  boundary and the fixed request end, without inventing readings during outages.
+- A fast horizontal one-finger swipe pans a zoomed chart without changing zoom.
+  Hold-and-drag still scrubs; vertical scrolling, pinch and double tap remain.
+- Time/value inspectors sit above the plots and reserve their space before
+  selection, so inspecting a value does not move the plot under the finger.
+- Synthetic regression tests cover long flat SOC sections, actual gaps,
+  statistics provenance and panning/inspection gesture separation.
+
+## Preserved Features
 
 - Web-matching MDI navigation icons: solar-power, battery-heart-variant,
   chart-line and lan-check. Tab labels are 12pt; NAM is centered over SOLAR.

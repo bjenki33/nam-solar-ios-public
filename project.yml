@@ -20,6 +20,7 @@ targets:
       - SolarCore.swift
       - SolarBatteryPower.swift
       - SolarHistoryPreparation.swift
+      - SolarSOCStatistics.swift
       - HAService.swift
       - SolarStore.swift
       - AuthenticationView.swift
@@ -52,8 +53,8 @@ targets:
         INFOPLIST_FILE: Info.plist
         TARGETED_DEVICE_FAMILY: '1'
         ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
-        MARKETING_VERSION: '1.4.2'
-        CURRENT_PROJECT_VERSION: '13'
+        MARKETING_VERSION: '1.4.3'
+        CURRENT_PROJECT_VERSION: '14'
         ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES: YES
   NamSolarTests:
     type: bundle.unit-test
@@ -62,6 +63,7 @@ targets:
       - SolarCoreTests.swift
       - SolarBatteryPowerTests.swift
       - SolarHistoryPreparationTests.swift
+      - SolarHistoryRegressionTests.swift
       - SolarArtworkTests.swift
       - SolarNavigationTests.swift
       - SolarLayoutTests.swift

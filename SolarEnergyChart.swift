@@ -23,8 +23,11 @@ struct SolarEnergyChartPanel: View {
             SolarEnergyBarChart(report: report, metric: metric, onExpand: { expanded = true })
         }.fullScreenCover(isPresented: $expanded) {
             NavigationStack {
-                ScrollView {
-                    SolarEnergyBarChart(report: report, metric: metric, expanded: true).padding(16)
+                GeometryReader { geometry in
+                    ScrollView {
+                        SolarEnergyBarChart(report: report, metric: metric, expanded: true,
+                            expandedHeight: max(150, min(280, geometry.size.height * 0.38))).padding(16)
+                    }
                 }.background(SolarTheme.ink)
                     .navigationTitle(metric.title).navigationBarTitleDisplayMode(.inline)
                     .toolbar { ToolbarItem(placement: .topBarTrailing) { Button("Đóng") { expanded = false }.accessibilityIdentifier("energy-close-chart") } }
@@ -37,10 +40,12 @@ private struct SolarEnergyBarChart: View {
     let report: SolarEnergyReport
     let metric: SolarEnergyMetric
     var expanded = false
+    var expandedHeight: CGFloat = 280
     var onExpand: (() -> Void)?
     @State private var selected: Date?
     @State private var window: ClosedRange<Date>?
     @State private var pinchWindow: ClosedRange<Date>?
+    @State private var panWindow: ClosedRange<Date>?
     private var domain: ClosedRange<Date> { window ?? report.range.start...report.range.end }
     private var selectedBucket: SolarEnergyBucket? {
         guard let selected else { return nil }
@@ -57,6 +62,7 @@ private struct SolarEnergyBarChart: View {
                     Button("Toàn khoảng") { window = nil }.accessibilityIdentifier("energy-reset-chart")
                 }.buttonStyle(.bordered)
             }
+            inspector
             Chart {
                 ForEach(report.buckets) { bucket in
                     if bucket.start < domain.upperBound, bucket.end > domain.lowerBound, let value = bucket.value(metric) {
@@ -100,30 +106,51 @@ private struct SolarEnergyBarChart: View {
                                     if pinchWindow == nil { pinchWindow = domain }
                                     zoom(Double(scale), base: pinchWindow)
                                 } else { pinchWindow = nil }
-                            }).frame(width: frame.width, height: frame.height).position(x: frame.midX, y: frame.midY)
+                            }, onPan: { fraction, state in
+                                if state == .began || state == .changed || state == .ended {
+                                    if panWindow == nil { panWindow = domain }
+                                    let base = panWindow ?? domain
+                                    let span = base.upperBound.timeIntervalSince(base.lowerBound)
+                                    let low = min(report.range.end.addingTimeInterval(-span),
+                                        max(report.range.start, base.lowerBound.addingTimeInterval(-Double(fraction) * span)))
+                                    window = low...low.addingTimeInterval(span)
+                                    if let selected, !domain.contains(selected) { self.selected = nil }
+                                }
+                                if state == .ended || state == .cancelled || state == .failed { panWindow = nil }
+                            }, panEnabled: domain.upperBound.timeIntervalSince(domain.lowerBound)
+                                < report.range.end.timeIntervalSince(report.range.start) - 0.01)
+                                .frame(width: frame.width, height: frame.height).position(x: frame.midX, y: frame.midY)
                                 .accessibilityElement(children: .ignore).accessibilityLabel("Biểu đồ điện năng")
                                 .accessibilityIdentifier(expanded ? "energy-expanded-plot" : "energy-chart-plot")
                         }
                     }
-                }.frame(height: expanded ? 280 : 200)
-            Text("kWh / " + (report.range.hourly ? "giờ" : "ngày") + " · Chạm hoặc giữ và kéo để xem · Chạm hai lần để mở lớn")
+                }.frame(height: expanded ? expandedHeight : 200)
+            Text("kWh / " + (report.range.hourly ? "giờ" : "ngày")
+                 + (expanded ? " · Vuốt ngang khi zoom · Giữ và kéo để rà số · Chạm hai lần để zoom"
+                    : " · Chạm hoặc giữ và kéo để xem · Chạm hai lần để mở lớn"))
                 .font(.system(size: 11)).foregroundStyle(SolarTheme.muted)
-            if let bucket = selectedBucket {
-                VStack(alignment: .leading, spacing: 5) {
-                    Text(report.range.hourly ? report.range.label(bucket.start) + " · " + report.range.label(bucket.start, time: true) + " – " + report.range.label(bucket.end, time: true)
-                         : report.range.label(bucket.start)).font(.system(size: 14, weight: .semibold))
-                        .accessibilityIdentifier("energy-selected-time")
-                    ForEach(SolarEnergyMetric.allCases) { item in
-                        HStack {
-                            Text(item.title).foregroundStyle(item.color)
-                            Spacer(minLength: 4)
-                            Text((item == .consumption ? "≈ " : "") + quantity(bucket.value(item), 2) + " kWh").monospacedDigit()
-                                .accessibilityIdentifier("energy-selected-" + item.id)
-                        }.font(.system(size: 12))
-                    }
-                }
+        }.onChange(of: report.range) { _, _ in selected = nil; window = nil; pinchWindow = nil; panWindow = nil }
+    }
+
+    private var inspector: some View {
+        VStack(alignment: .leading, spacing: 5) {
+            Text(selectedBucket.map { bucket in
+                report.range.hourly ? report.range.label(bucket.start) + " · " + report.range.label(bucket.start, time: true) + " – " + report.range.label(bucket.end, time: true)
+                    : report.range.label(bucket.start)
+            } ?? "Chạm hoặc giữ trên biểu đồ để xem")
+                .font(.system(size: 14, weight: .semibold)).lineLimit(1)
+                .accessibilityIdentifier(selectedBucket == nil ? "energy-inspector-prompt" : "energy-selected-time")
+            ForEach(SolarEnergyMetric.allCases) { item in
+                HStack {
+                    Text(item.title).foregroundStyle(item.color)
+                    Spacer(minLength: 4)
+                    Text((item == .consumption ? "≈ " : "") + quantity(selectedBucket?.value(item), 2) + " kWh").monospacedDigit()
+                        .accessibilityIdentifier("energy-selected-" + item.id)
+                }.font(.system(size: 12)).lineLimit(1)
             }
-        }.onChange(of: report.range) { _, _ in selected = nil; window = nil; pinchWindow = nil }
+        }.padding(12).background(SolarTheme.ink, in: RoundedRectangle(cornerRadius: 6))
+            .overlay(RoundedRectangle(cornerRadius: 6).stroke(SolarTheme.border, lineWidth: 0.7))
+            .accessibilityIdentifier("energy-inspector")
     }
 
     private func zoom(_ factor: Double, base: ClosedRange<Date>? = nil) {

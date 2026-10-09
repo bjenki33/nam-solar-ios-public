@@ -21,7 +21,8 @@ struct SolarChartModel: Sendable {
         let sorted = unique.values.sorted {
             if $0.date != $1.date { return $0.date < $1.date }
             if $0.entity != $1.entity { return $0.entity < $1.entity }
-            return $0.segment < $1.segment
+            if $0.segment != $1.segment { return $0.segment < $1.segment }
+            return $0.isBoundary && !$1.isBoundary
         }
         points = sorted
         renderingPoints = SolarChartRendering.reduced(sorted)
@@ -62,6 +63,12 @@ struct SolarChartModel: Sendable {
         let index = insertionIndex(in: items, date: date, afterEqual: true) - 1
         guard index >= 0 else { return nil }
         let point = items[index]
+        // A mean belongs to its recorded bucket, not to a made-up instantaneous sample.
+        if index + 1 < items.count {
+            let next = items[index + 1]
+            if next.aggregation != nil, let start = next.recordedAt, date >= start, date <= next.date { return next }
+        }
+        guard !point.isBoundary else { return nil }
         if point.date == date { return point }
         guard index + 1 < items.count, items[index + 1].segment == point.segment else { return nil }
         return point

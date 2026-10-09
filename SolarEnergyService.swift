@@ -3,6 +3,48 @@ import Foundation
 // A separate short-lived, read-only channel: statistics cannot consume live state frames.
 @MainActor
 extension HAService {
+    func socHistory() async throws -> [HistoryPoint] {
+        for attempt in 0...1 {
+            let token = try await accessToken(forceRefresh: attempt > 0)
+            try Task.checkCancellation()
+            let channel = socket()
+            let deadline = Task {
+                do { try await Task.sleep(for: .seconds(30)); channel.cancel(with: .goingAway, reason: nil) }
+                catch { }
+            }
+            defer { deadline.cancel(); channel.cancel(with: .goingAway, reason: nil) }
+            do {
+                return try await withTaskCancellationHandler {
+                    guard try await Self.energyReceive(channel).type == "auth_required" else { throw SolarError.invalidResponse }
+                    try await Self.energySend(["type": "auth", "access_token": token], channel)
+                    let auth = try await Self.energyReceive(channel)
+                    if auth.type == "auth_invalid" { throw SolarError.expiredLogin }
+                    guard auth.type == "auth_ok" else { throw SolarError.invalidResponse }
+                    let end = Date()
+                    let statistics: [String: [SolarSOCStatistic]] = try await Self.energyRequest(1,
+                        type: "recorder/statistics_during_period", parameters: [
+                            "statistic_ids": [SolarSOCStatistics.entity],
+                            "start_time": SolarDate.iso(end.addingTimeInterval(-86400)), "end_time": SolarDate.iso(end),
+                            "period": "5minute", "types": ["mean"]
+                        ], channel: channel)
+                    let points = try await SolarHistoryPreparation.socStatistics(statistics[SolarSOCStatistics.entity] ?? [])
+                    guard !points.isEmpty else { throw SolarError.invalidResponse }
+                    return points
+                } onCancel: { channel.cancel(with: .goingAway, reason: nil) }
+            } catch SolarError.expiredLogin where attempt == 0 { continue }
+        }
+        throw SolarError.expiredLogin
+    }
+
+    func preferredSOCHistory() async throws -> [HistoryPoint] {
+        do { return try await socHistory() }
+        catch {
+            try Task.checkCancellation()
+            // Older HA installations may not record statistics. Raw fallback is explicitly labelled in the inspector.
+            return try await history(entities: [SolarSOCStatistics.entity], hours: 24)
+        }
+    }
+
     func energyHistory(_ selected: SolarEnergyRange) async throws -> SolarEnergyReport {
         for attempt in 0...1 {
             let token = try await accessToken(forceRefresh: attempt > 0)

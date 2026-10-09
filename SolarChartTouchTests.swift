@@ -11,7 +11,10 @@ final class SolarChartTouchTests: XCTestCase {
         XCTAssertEqual(view.doubleTapRecognizer.numberOfTapsRequired, 2)
         XCTAssertTrue(view.holdRecognizer.delegate === view)
         XCTAssertTrue(view.pinchRecognizer.delegate === view)
-        XCTAssertEqual(view.gestureRecognizers?.count, 4)
+        XCTAssertEqual(view.gestureRecognizers?.count, 5)
+        XCTAssertFalse(view.panRecognizer.isEnabled)
+        XCTAssertEqual(view.panRecognizer.minimumNumberOfTouches, 1)
+        XCTAssertEqual(view.panRecognizer.maximumNumberOfTouches, 1)
     }
 
     @MainActor func testHoldAndPinchTakePriorityOnlyOverAncestorScrolling() {
@@ -23,8 +26,18 @@ final class SolarChartTouchTests: XCTestCase {
         for scroll in [inner, outer] {
             XCTAssertTrue(view.gestureRecognizer(view.holdRecognizer, shouldBeRequiredToFailBy: scroll.panGestureRecognizer))
             XCTAssertTrue(view.gestureRecognizer(view.pinchRecognizer, shouldBeRequiredToFailBy: scroll.panGestureRecognizer))
+            XCTAssertTrue(view.gestureRecognizer(view.panRecognizer, shouldBeRequiredToFailBy: scroll.panGestureRecognizer))
             XCTAssertFalse(view.gestureRecognizer(view.tapRecognizer, shouldBeRequiredToFailBy: scroll.panGestureRecognizer))
         }
+    }
+
+    @MainActor func testPanRejectsVerticalDiagonalAndNonFiniteMovement() {
+        XCTAssertTrue(SolarChartTouchView.isHorizontal(CGPoint(x: -100, y: 10)))
+        XCTAssertTrue(SolarChartTouchView.isHorizontal(CGPoint(x: 100, y: -10)))
+        XCTAssertFalse(SolarChartTouchView.isHorizontal(CGPoint(x: 10, y: 100)))
+        XCTAssertFalse(SolarChartTouchView.isHorizontal(CGPoint(x: 100, y: 100)))
+        XCTAssertFalse(SolarChartTouchView.isHorizontal(.zero))
+        XCTAssertFalse(SolarChartTouchView.isHorizontal(CGPoint(x: CGFloat.nan, y: 0)))
     }
 
     @MainActor func testUnrelatedScrollingAndButtonsKeepTheirOwnGestures() {

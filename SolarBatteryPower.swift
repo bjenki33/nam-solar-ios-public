@@ -14,7 +14,8 @@ enum SolarBatteryPower {
         raw.compactMap { point in
             guard point.entity == entity else { return point }
             guard let value = display(point.value) else { return nil }
-            return HistoryPoint(entity: point.entity, date: point.date, value: value, segment: point.segment)
+            return HistoryPoint(entity: point.entity, date: point.date, value: value, segment: point.segment,
+                                recordedAt: point.recordedAt, isBoundary: point.isBoundary, aggregation: point.aggregation)
         }
     }
 }

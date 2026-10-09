@@ -151,7 +151,7 @@ final class NamSolarUITests: XCTestCase {
         let footer = app.staticTexts["app-version-footer"]
         for _ in 0..<8 { if footer.isHittable { break }; app.swipeUp() }
         XCTAssertTrue(footer.isHittable)
-        XCTAssertTrue(footer.label.contains("Nam Solar 1.4.2 (13)"))
+        XCTAssertTrue(footer.label.contains("Nam Solar 1.4.3 (14)"))
         XCTAssertFalse(footer.label.contains("Nam Solar 1.1 "))
         saveScreenshot("NamSolar-current-version-footer")
     }
@@ -551,5 +551,41 @@ final class NamSolarUITests: XCTestCase {
         scrubChart(app, plot: app.descendants(matching: .any)["chart-expanded-plot-mV"].firstMatch)
         saveScreenshot("NamSolar-cell-chart-inspection-test-data")
         app.buttons["Đóng biểu đồ"].tap()
+    }
+
+    func testZoomedSOCSwipesPanWithoutChangingZoomAndInspectorStaysAbovePlot() {
+        let app = XCUIApplication()
+        app.launchArguments = ["--ui-preview"]
+        app.launch()
+        app.buttons["Pin"].tap()
+        let open = app.buttons["Phóng to Dung lượng pin · 24 giờ"]
+        for _ in 0..<10 { if open.isHittable { break }; app.swipeUp() }
+        XCTAssertTrue(open.isHittable)
+        open.tap()
+        let plot = app.descendants(matching: .any)["chart-expanded-plot-%"].firstMatch
+        XCTAssertTrue(plot.waitForExistence(timeout: 5))
+        let initialFrame = plot.frame
+        plot.tap()
+        XCTAssertTrue(app.staticTexts["chart-selected-time"].waitForExistence(timeout: 5))
+        XCTAssertLessThan(app.staticTexts["chart-selected-time"].frame.maxY, plot.frame.minY)
+        XCTAssertLessThan(app.staticTexts["chart-value-sensor.lux_battery_soc"].frame.maxY, plot.frame.minY)
+        XCTAssertEqual(plot.frame.minY, initialFrame.minY, accuracy: 2, "Inspector must reserve its space before touch-down")
+        app.buttons["Phóng to trục thời gian"].tap()
+        let zoom = app.staticTexts["chart-zoom-level"].value as? String
+        let before = app.staticTexts["chart-visible-range"].label
+        plot.swipeLeft(velocity: .fast)
+        let later = app.staticTexts["chart-visible-range"].label
+        XCTAssertNotEqual(later, before, "A fast one-finger horizontal swipe must pan a zoomed chart")
+        XCTAssertEqual(app.staticTexts["chart-zoom-level"].value as? String, zoom)
+        plot.swipeRight(velocity: .fast)
+        XCTAssertNotEqual(app.staticTexts["chart-visible-range"].label, later)
+        XCTAssertEqual(app.staticTexts["chart-zoom-level"].value as? String, zoom)
+        let beforeScrub = app.staticTexts["chart-visible-range"].label
+        scrubChart(app, plot: plot)
+        XCTAssertEqual(app.staticTexts["chart-visible-range"].label, beforeScrub, "Hold-and-drag must scrub, not pan")
+        XCTAssertLessThan(app.staticTexts["chart-selected-time"].frame.maxY, plot.frame.minY)
+        saveScreenshot("NamSolar-SOC-pan-inspector-above-test-data")
+        app.buttons["Đặt lại biểu đồ"].tap()
+        XCTAssertEqual(Double(app.staticTexts["chart-zoom-level"].value as? String ?? "0") ?? 0, 1, accuracy: 0.01)
     }
 }

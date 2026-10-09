@@ -99,6 +99,7 @@ private struct SolarHistoryChart: View {
     @State private var window: ClosedRange<Date>?
     @State private var pinchWindow: ClosedRange<Date>?
     @State private var pinchFocus: Date?
+    @State private var panWindow: ClosedRange<Date>?
 
     init(title: String, model: SolarChartModel, unit: String, expanded: Bool = false,
          height: CGFloat = 190, initialSelection: Date? = nil, onExpand: ((Date?) -> Void)? = nil) {
@@ -127,15 +128,15 @@ private struct SolarHistoryChart: View {
                     .font(.system(size: 10)).foregroundStyle(SolarTheme.muted).monospacedDigit()
                     .accessibilityIdentifier("chart-visible-range")
             }
+            inspector(at: selection)
             plot.frame(height: height)
             ViewThatFits(in: .horizontal) {
                 HStack(spacing: 14) { legend }
                 VStack(alignment: .leading, spacing: 8) { legend }
             }
-            Text(expanded ? "Chạm để xem · Giữ và kéo để rà giờ · Chụm hai ngón hoặc chạm hai lần để zoom"
+            Text(expanded ? "Vuốt ngang khi zoom để dịch giờ · Giữ và kéo để rà số · Chụm hai ngón hoặc chạm hai lần để zoom"
                  : "Chạm để xem giờ và giá trị · Chạm hai lần để mở lớn")
                 .font(.system(size: 10)).foregroundStyle(SolarTheme.muted)
-            if let selection { inspector(at: selection) }
             if !expanded && window != nil {
                 Button("Toàn khoảng") { reset() }.font(.caption).accessibilityLabel("Đặt lại biểu đồ")
             }
@@ -143,6 +144,7 @@ private struct SolarHistoryChart: View {
             window = nil
             pinchWindow = nil
             pinchFocus = nil
+            panWindow = nil
             if let selection, !model.domain.contains(selection) { self.selection = nil }
         }
     }
@@ -152,7 +154,8 @@ private struct SolarHistoryChart: View {
             ForEach(model.drawingPoints(in: visibleWindow)) { point in
                 LineMark(x: .value("Thời gian", point.date), y: .value(unit, point.value),
                          series: .value("Đoạn", point.entity + "-" + String(point.segment)))
-                    .foregroundStyle(SolarChartStyle.color(point.entity)).interpolationMethod(.stepEnd)
+                    .foregroundStyle(SolarChartStyle.color(point.entity))
+                    .interpolationMethod(point.aggregation == nil ? .stepEnd : .linear)
                 if model.series.first(where: { $0.entity == point.entity })?.points.count == 1 {
                     PointMark(x: .value("Thời gian", point.date), y: .value(unit, point.value))
                         .foregroundStyle(SolarChartStyle.color(point.entity))
@@ -193,12 +196,22 @@ private struct SolarHistoryChart: View {
                                 pinchFocus = nil
                             default: break
                             }
-                        })
+                        }, onPan: { fraction, state in
+                            switch state {
+                            case .began, .changed, .ended:
+                                if panWindow == nil { panWindow = visibleWindow }
+                                window = model.shifted(panWindow ?? visibleWindow, by: -Double(fraction))
+                                if let selection, !visibleWindow.contains(selection) { self.selection = nil }
+                                if state == .ended { panWindow = nil }
+                            case .cancelled, .failed: panWindow = nil
+                            default: break
+                            }
+                        }, panEnabled: zoomFactor > 1.001)
                             .frame(width: frame.width, height: frame.height)
                             .position(x: frame.midX, y: frame.midY)
                             .accessibilityElement(children: .ignore)
                             .accessibilityLabel("Biểu đồ " + title)
-                            .accessibilityHint("Chạm hai lần để phóng to. Chạm hoặc giữ và kéo để xem dữ liệu.")
+                            .accessibilityHint("Vuốt ngang khi đã zoom để dịch thời gian. Chạm hoặc giữ và kéo để xem dữ liệu.")
                             .accessibilityIdentifier((expanded ? "chart-expanded-plot-" : "chart-plot-") + unit)
                             .accessibilityAction(named: Text("Phóng to")) {
                                 if expanded { zoom(2, around: focus) } else { onExpand?(selection) }
@@ -245,31 +258,52 @@ private struct SolarHistoryChart: View {
         }
     }
 
-    private func inspector(at date: Date) -> some View {
+    private func inspector(at date: Date?) -> some View {
         VStack(alignment: .leading, spacing: 8) {
-            Text("Thời điểm " + solarDay(date) + " · " + solarTime(date))
+            Text(date.map { "Thời điểm " + solarDay($0) + " · " + solarTime($0) } ?? "Chạm hoặc giữ trên biểu đồ để xem")
                 .font(.system(size: 13, weight: .semibold)).monospacedDigit()
-                .accessibilityIdentifier(expanded ? "chart-selected-time" : "chart-compact-selected-time")
-            ForEach(model.series) { series in
-                let point = model.sample(at: date, entity: series.entity)
-                VStack(alignment: .leading, spacing: 2) {
-                    HStack {
-                        Text(SolarChartStyle.name(series.entity))
-                        Spacer()
-                        Text(point.map { $0.value.formatted(.number.locale(Locale(identifier: "vi_VN"))
-                            .precision(.fractionLength(0...2))) + " " + unit } ?? "Không có mẫu")
-                            .monospacedDigit().accessibilityIdentifier((expanded ? "chart-value-" : "chart-compact-value-") + series.entity)
-                    }.font(.system(size: 14, weight: .semibold)).foregroundStyle(SolarChartStyle.color(series.entity))
-                    if let point {
-                        Text("Mẫu ghi lúc " + solarDay(point.date) + " " + solarTime(point.date))
-                            .font(.system(size: 9)).foregroundStyle(SolarTheme.muted)
-                    }
+                .lineLimit(1)
+                .accessibilityIdentifier(date == nil ? "chart-inspector-prompt" : expanded ? "chart-selected-time" : "chart-compact-selected-time")
+            if model.series.count > 2 {
+                LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], alignment: .leading, spacing: 8) {
+                    inspectorValues(at: date)
                 }
+            } else {
+                VStack(alignment: .leading, spacing: 8) { inspectorValues(at: date) }
             }
-            Text("Giữ giá trị theo mẫu ghi, không nội suy qua đoạn mất dữ liệu.")
+            Text(model.points.contains(where: { $0.aggregation != nil })
+                 ? "Tổng hợp 5 phút từ Recorder · Không lấp khoảng thống kê thiếu."
+                 : "Giữ giá trị theo mẫu ghi, không nội suy qua đoạn mất dữ liệu.")
                 .font(.system(size: 9)).foregroundStyle(SolarTheme.muted)
+                .lineLimit(1)
         }.padding(12).background(SolarTheme.ink, in: RoundedRectangle(cornerRadius: 6))
             .overlay(RoundedRectangle(cornerRadius: 6).stroke(SolarTheme.border, lineWidth: 0.7))
+            .accessibilityIdentifier("chart-inspector")
+    }
+
+    private func inspectorValues(at date: Date?) -> some View {
+        ForEach(model.series) { series in
+            let point = date.flatMap { model.sample(at: $0, entity: series.entity) }
+            VStack(alignment: .leading, spacing: 2) {
+                HStack {
+                    Text(SolarChartStyle.name(series.entity))
+                    Spacer()
+                    Text(point.map { $0.value.formatted(.number.locale(Locale(identifier: "vi_VN"))
+                        .precision(.fractionLength(0...2))) + " " + unit } ?? (date == nil ? "-- " + unit : "Không có mẫu"))
+                        .monospacedDigit().accessibilityIdentifier((expanded ? "chart-value-" : "chart-compact-value-") + series.entity)
+                }.font(.system(size: 14, weight: .semibold)).foregroundStyle(SolarChartStyle.color(series.entity)).lineLimit(1)
+                Text(sampleDescription(point))
+                    .font(.system(size: 9)).foregroundStyle(SolarTheme.muted).lineLimit(1)
+            }
+        }
+    }
+
+    private func sampleDescription(_ point: HistoryPoint?) -> String {
+        guard let point else { return "Không có dữ liệu tại thời điểm chọn" }
+        if let interval = point.aggregation, let start = point.recordedAt {
+            return "Trung bình 5 phút: " + solarTime(start) + " – " + solarTime(start.addingTimeInterval(interval))
+        }
+        return "Mẫu ghi lúc " + solarDay(point.recordedAt ?? point.date) + " " + solarTime(point.recordedAt ?? point.date)
     }
 
     private func select(x: CGFloat, proxy: ChartProxy) {
@@ -290,6 +324,7 @@ private struct SolarHistoryChart: View {
         window = nil
         pinchWindow = nil
         pinchFocus = nil
+        panWindow = nil
         selection = nil
     }
 }

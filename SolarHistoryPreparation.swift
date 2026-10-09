@@ -7,11 +7,17 @@ struct SolarPreparedHistory: Sendable {
 }
 
 enum SolarHistoryPreparation {
-    static func decode(_ data: Data, allowed: Set<String>) async throws -> [HistoryPoint] {
+    static func socStatistics(_ buckets: [SolarSOCStatistic]) async throws -> [HistoryPoint] {
+        try Task.checkCancellation()
+        let worker = Task.detached(priority: .utility) { try SolarSOCStatistics.points(buckets) }
+        return try await withTaskCancellationHandler(operation: { try await worker.value }, onCancel: { worker.cancel() })
+    }
+
+    static func decode(_ data: Data, allowed: Set<String>, end: Date? = nil) async throws -> [HistoryPoint] {
         try Task.checkCancellation()
         let worker = Task.detached(priority: .utility) {
             try Task.checkCancellation()
-            let result = try HistoryParser.parse(data, allowed: allowed)
+            let result = try HistoryParser.parse(data, allowed: allowed, end: end)
             try Task.checkCancellation()
             return result
         }

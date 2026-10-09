@@ -97,12 +97,14 @@ final class HAService {
     }
 
     func history(entities: [String], hours: Int) async throws -> [HistoryPoint] {
-        let start = Date().addingTimeInterval(-Double(hours) * 3600)
+        let end = Date()
+        let start = end.addingTimeInterval(-Double(hours) * 3600)
         var components = URLComponents(url: SolarConfig.base.appendingPathComponent("api/history/period/" + SolarDate.iso(start)), resolvingAgainstBaseURL: false)!
         components.queryItems = [URLQueryItem(name: "filter_entity_id", value: entities.joined(separator: ",")),
-                                 URLQueryItem(name: "minimal_response", value: ""), URLQueryItem(name: "no_attributes", value: "")]
+                                 URLQueryItem(name: "minimal_response", value: ""), URLQueryItem(name: "no_attributes", value: ""),
+                                 URLQueryItem(name: "end_time", value: SolarDate.iso(end))]
         let data = try await authenticatedGET(components.url!)
-        return try await SolarHistoryPreparation.decode(data, allowed: Set(entities))
+        return try await SolarHistoryPreparation.decode(data, allowed: Set(entities), end: end)
     }
 
     func socket() -> URLSessionWebSocketTask {

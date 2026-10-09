@@ -270,12 +270,14 @@ final class SolarStore {
             }
             do {
                 async let power = self.service.history(entities: SolarConfig.powerEntities, hours: 2)
-                async let battery = self.service.history(entities: SolarConfig.batteryEntities, hours: 24)
-                let result = try await (power, battery)
-                let charts = try await SolarHistoryPreparation.general(power: result.0, battery: result.1)
+                async let cell = self.service.history(entities: ["sensor.lux_cell_delta"], hours: 24)
+                async let soc = self.service.preferredSOCHistory()
+                let result = try await (power, cell, soc)
+                let battery = result.1 + result.2
+                let charts = try await SolarHistoryPreparation.general(power: result.0, battery: battery)
                 guard self.loggedIn, self.epoch == id, !Task.isCancelled else { return }
                 self.powerHistory = result.0
-                self.batteryHistory = result.1
+                self.batteryHistory = battery
                 self.preparedHistory = charts
                 self.historyLoadedAt = Date()
             } catch {

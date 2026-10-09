@@ -15,8 +15,9 @@ final class SolarHistoryPreparationTests: XCTestCase {
         {"state":"240","last_updated":"2026-10-08T05:02:00+00:00"}]]
         """
         let points = try await SolarHistoryPreparation.decode(Data(json.utf8), allowed: [SolarBatteryPower.entity])
-        XCTAssertEqual(points.map(\.value), [-240, 240], "Decode must not change raw signs")
-        XCTAssertEqual(points.map(\.segment), [0, 1])
+        XCTAssertEqual(points.map(\.value), [-240, -240, 240], "Decode must not change raw signs")
+        XCTAssertEqual(points.map(\.segment), [0, 0, 1])
+        XCTAssertTrue(points[1].isBoundary)
         XCTAssertEqual(points.first?.date, SolarDate.parse("2026-10-08T05:00:00.123Z"))
     }
 

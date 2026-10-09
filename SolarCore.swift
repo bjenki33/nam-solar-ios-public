@@ -172,11 +172,14 @@ struct HistoryPoint: Identifiable, Sendable {
     let date: Date
     let value: Double
     let segment: Int
-    var id: String { "\(entity)|\(date.timeIntervalSince1970)|\(segment)" }
+    var recordedAt: Date? = nil
+    var isBoundary: Bool = false
+    var aggregation: TimeInterval? = nil
+    var id: String { "\(entity)|\(date.timeIntervalSince1970)|\(segment)|\(isBoundary)" }
 }
 
 enum HistoryParser {
-    static func parse(_ data: Data, allowed: Set<String>) throws -> [HistoryPoint] {
+    static func parse(_ data: Data, allowed: Set<String>, end: Date? = nil) throws -> [HistoryPoint] {
         let groups = try JSONDecoder().decode([[HistoryRecord]].self, from: data)
         var points: [HistoryPoint] = []
         let dates = SolarDate.Parser()
@@ -184,11 +187,30 @@ enum HistoryParser {
             try Task.checkCancellation()
             guard let entity = group.first?.entity_id, allowed.contains(entity) else { continue }
             var segment = 0
+            var last: HistoryPoint?
             for (index, record) in group.enumerated() {
                 if index % 128 == 0 { try Task.checkCancellation() }
-                guard let date = dates.parse(record.last_updated ?? record.last_changed),
-                      let value = finiteNumber(record.state) else { segment += 1; continue }
-                points.append(HistoryPoint(entity: entity, date: date, value: value, segment: segment))
+                guard let date = dates.parse(record.last_updated ?? record.last_changed) else {
+                    // An unknown boundary cannot safely extend a previous reading.
+                    segment += 1; last = nil; continue
+                }
+                if let end, date > end { break }
+                if let previous = last, date < previous.date { segment += 1; last = nil }
+                guard let value = finiteNumber(record.state) else {
+                    if let previous = last, date >= previous.date {
+                        if date == previous.date { points.removeLast() }
+                        points.append(HistoryPoint(entity: entity, date: date, value: previous.value,
+                            segment: segment, recordedAt: previous.date, isBoundary: true))
+                    }
+                    segment += 1; last = nil; continue
+                }
+                let point = HistoryPoint(entity: entity, date: date, value: value, segment: segment)
+                points.append(point)
+                last = point
+            }
+            if let end, let previous = last, end > previous.date {
+                points.append(HistoryPoint(entity: entity, date: end, value: previous.value,
+                    segment: segment, recordedAt: previous.date, isBoundary: true))
             }
         }
         return points.sorted { $0.date < $1.date }

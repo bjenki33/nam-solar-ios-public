@@ -76,9 +76,10 @@ final class SolarCoreTests: XCTestCase {
         {"state":"20","last_changed":"2026-10-07T05:02:00Z"}]]
         """
         let points = try HistoryParser.parse(Data(json.utf8), allowed: ["sensor.lux_pv_power"])
-        XCTAssertEqual(points.count, 2)
-        XCTAssertEqual(points.map(\.segment), [0, 1])
-        XCTAssertEqual(points.map(\.value), [10, 20])
+        XCTAssertEqual(points.count, 3)
+        XCTAssertEqual(points.map(\.segment), [0, 0, 1])
+        XCTAssertEqual(points.map(\.value), [10, 10, 20])
+        XCTAssertEqual(points.map(\.isBoundary), [false, true, false])
     }
     func testOAuthRejectsWrongHostOrState() {
         let valid = URL(string: SolarConfig.redirect + "?code=abc&state=test")!
