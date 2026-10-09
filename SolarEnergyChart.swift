@@ -139,13 +139,15 @@ private struct SolarEnergyBarChart: View {
                     : report.range.label(bucket.start)
             } ?? "Chạm hoặc giữ trên biểu đồ để xem")
                 .font(.system(size: 14, weight: .semibold)).lineLimit(1)
-                .accessibilityIdentifier(selectedBucket == nil ? "energy-inspector-prompt" : "energy-selected-time")
+                .accessibilityIdentifier(selectedBucket == nil
+                    ? (expanded ? "energy-inspector-prompt" : "energy-compact-inspector-prompt")
+                    : (expanded ? "energy-selected-time" : "energy-compact-selected-time"))
             ForEach(SolarEnergyMetric.allCases) { item in
                 HStack {
                     Text(item.title).foregroundStyle(item.color)
                     Spacer(minLength: 4)
                     Text((item == .consumption ? "≈ " : "") + quantity(selectedBucket?.value(item), 2) + " kWh").monospacedDigit()
-                        .accessibilityIdentifier("energy-selected-" + item.id)
+                        .accessibilityIdentifier((expanded ? "energy-selected-" : "energy-compact-selected-") + item.id)
                 }.font(.system(size: 12)).lineLimit(1)
             }
         }.padding(12).background(SolarTheme.ink, in: RoundedRectangle(cornerRadius: 6))

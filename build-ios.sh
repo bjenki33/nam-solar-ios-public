@@ -49,6 +49,7 @@ xcodebuild test -project NamSolar.xcodeproj -scheme NamSolar -configuration Debu
   -only-testing:NamSolarTests/SolarChartTouchTests \
   -only-testing:NamSolarUITests/NamSolarUITests/testZoomedSOCSwipesPanWithoutChangingZoomAndInspectorStaysAbovePlot \
   -only-testing:NamSolarUITests/NamSolarUITests/testBatteryPercentAndCellChartsCanBeExpandedAndInspected \
+  -only-testing:NamSolarUITests/NamSolarUITests/testEnergyDayAndInclusiveRangeChartsAndDateControls \
   -resultBundlePath build/GestureSmokeResults.xcresult CODE_SIGNING_ALLOWED=NO 2>&1 | tee build/gesture-smoke-tests.log
 xcodebuild test -project NamSolar.xcodeproj -scheme NamSolar -configuration Debug \
   -destination "platform=iOS Simulator,id=$simulator" -parallel-testing-enabled NO -derivedDataPath build/DerivedData \

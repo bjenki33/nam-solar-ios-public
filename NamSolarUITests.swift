@@ -471,8 +471,15 @@ final class NamSolarUITests: XCTestCase {
         let selected = app.staticTexts["energy-selected-time"].label
         left.press(forDuration: 0.4, thenDragTo: right)
         XCTAssertNotEqual(app.staticTexts["energy-selected-time"].label, selected)
+        XCTAssertEqual(app.staticTexts.matching(identifier: "energy-selected-consumption").count, 1)
         XCTAssertTrue(app.staticTexts["energy-selected-consumption"].label.contains("kWh"))
+        XCTAssertLessThan(app.staticTexts["energy-selected-consumption"].frame.maxY, plot.frame.minY)
         plot.doubleTap()
+        right.press(forDuration: 0.4)
+        let zoomedDate = app.staticTexts["energy-selected-time"].label
+        plot.swipeRight()
+        right.press(forDuration: 0.4)
+        XCTAssertNotEqual(app.staticTexts["energy-selected-time"].label, zoomedDate)
         app.buttons["energy-reset-chart"].tap()
         saveScreenshot("NamSolar-energy-expanded-inspection-test-data")
         app.buttons["energy-close-chart"].tap()
