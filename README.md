@@ -1,5 +1,9 @@
 # Nam Solar for iPhone
 
+Version 1.4.3 also isolates the history calendar's draft/month from live updates.
+Date selection is confirmed explicitly before applying a history request. Pull-to-refresh
+has been removed; live WebSocket updates, automatic reconnection and explicit recovery/history buttons remain.
+
 Native, read-only SwiftUI solar monitoring app. Requires iOS 26.0 or later.
 This is a clean public build repository authorized by the owner. The original
 private repository, its history and personal work journal remain private.

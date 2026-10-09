@@ -39,7 +39,7 @@ struct SolarPage<Content: View>: View {
                     Text("NAM SOLAR · CHỈ ĐỌC DỮ LIỆU").font(.system(size: 9)).tracking(1)
                         .foregroundStyle(SolarTheme.muted).frame(maxWidth: .infinity).padding(.vertical, 8)
                 }.padding(.horizontal, 12).padding(.top, 16).padding(.bottom, 16)
-            }.refreshable { store.start(force: true) }
+            }
         }
     }
 }
@@ -63,7 +63,7 @@ struct OverviewView: View {
                         DataStatus(snapshot: s, message: store.connectionMessage).padding(.vertical, 2)
                         SolarFlowView(snapshot: s, selection: $selection)
                     }.padding(.horizontal, 8)
-                }.refreshable { store.start(force: true) }
+                }
                     .alert("Nguồn tiêu thụ ước tính", isPresented: $sourceNote) { Button("Đóng", role: .cancel) {} } message: {
                         Text("Giả định pin chỉ sạc từ PV và điện phát lưới chỉ từ PV. Từ PV = sản lượng PV − sạc pin − phát lưới. Có gồm hao hụt biến tần. Nếu có sạc từ lưới hoặc xả pin lên lưới, phân bổ này có thể không chính xác.")
                     }

@@ -10,6 +10,7 @@ struct SolarEnergyHistoryView: View {
     @State private var chartMetric = SolarEnergyMetric.consumption
     @State private var showRows = false
     @State private var loadTicket = UUID()
+    @State private var dateRequest: SolarHistoryDateRequest?
 
     private var history: SolarEnergyStore { store.energyHistory }
     private var calendar: Calendar { SolarEnergyRange.calendar(history.timeZoneID) }
@@ -40,6 +41,11 @@ struct SolarEnergyHistoryView: View {
             }
             .environment(\.timeZone, calendar.timeZone)
             .environment(\.locale, Locale(identifier: "vi_VN"))
+            .sheet(item: $dateRequest) { request in
+                SolarHistoryDatePicker(request: request) { day in
+                    if request.field == .from { from = day } else { through = day }
+                }
+            }
     }
 
     private var controls: some View {
@@ -53,11 +59,9 @@ struct SolarEnergyHistoryView: View {
                 Text("Một ngày").tag(false)
                 Text("Khoảng ngày").tag(true)
             }.pickerStyle(.segmented).accessibilityIdentifier("energy-range-mode")
-            DatePicker(rangeMode ? "Từ ngày" : "Ngày xem", selection: $from, in: ...Date(), displayedComponents: .date)
-                .accessibilityIdentifier("energy-from-date")
+            dateButton(rangeMode ? "Từ ngày" : "Ngày xem", date: from, field: .from, id: "energy-from-date")
             if rangeMode {
-                DatePicker("Đến ngày", selection: $through, in: ...Date(), displayedComponents: .date)
-                    .accessibilityIdentifier("energy-through-date")
+                dateButton("Đến ngày", date: through, field: .through, id: "energy-through-date")
             }
             LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 6) {
                 quickButton("Hôm nay", offset: 0)
@@ -86,6 +90,21 @@ struct SolarEnergyHistoryView: View {
                     .accessibilityIdentifier("energy-unapplied")
             }
         }
+    }
+
+    private func dateButton(_ title: String, date: Date, field: SolarHistoryDateRequest.Field, id: String) -> some View {
+        Button {
+            dateRequest = SolarHistoryDateRequest(field: field, selection: date,
+                timeZoneID: history.timeZoneID, now: Date())
+        } label: {
+            HStack {
+                Text(title).foregroundStyle(.white)
+                Spacer(minLength: 8)
+                Text(SolarCalendarDraft(selection: date, timeZoneID: history.timeZoneID).label(date))
+                    .monospacedDigit().padding(.horizontal, 10).padding(.vertical, 8)
+                    .background(SolarTheme.sun.opacity(0.1), in: RoundedRectangle(cornerRadius: 7))
+            }.font(.system(size: 15)).frame(minHeight: 44)
+        }.buttonStyle(.plain).accessibilityIdentifier(id)
     }
 
     private func quickButton(_ title: String, offset: Int) -> some View {
@@ -188,16 +207,11 @@ struct SolarEnergyHistoryView: View {
             let selected = try SolarEnergyRange(from: from, through: rangeMode ? through : from, timeZoneID: history.timeZoneID)
             let id = UUID()
             loadTicket = id
-            let originalFrom = from
-            let originalThrough = through
             validation = nil; applied = selected; showRows = false
             await store.loadEnergyHistory(selected, force: force)
             guard loadTicket == id else { return }
             if let report = history.report {
                 applied = report.range
-                if from == originalFrom, through == originalThrough {
-                    from = report.range.start; through = report.range.lastDay
-                }
             }
         } catch { validation = error.localizedDescription }
     }

@@ -40,6 +40,8 @@ targets:
       - SolarEnergyStore.swift
       - SolarEnergyService.swift
       - SolarEnergyHistoryView.swift
+      - SolarCalendarDraft.swift
+      - SolarHistoryDatePicker.swift
       - SolarEnergyChart.swift
       - SolarEnergyPreview.swift
       - SolarMetricIcon-NOTICE.txt
@@ -72,6 +74,7 @@ targets:
       - SolarChartTouchTests.swift
       - SolarMetricIconTests.swift
       - SolarEnergyTests.swift
+      - SolarCalendarTests.swift
     dependencies:
       - target: NamSolar
     settings:

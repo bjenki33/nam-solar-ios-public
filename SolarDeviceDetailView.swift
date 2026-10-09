@@ -53,7 +53,7 @@ struct SolarDeviceDetailView: View {
                                 .font(.system(size: 12)).buttonStyle(.bordered).disabled(history.loading)
                         }
                     }.padding(16)
-                }.refreshable { await store.loadDeviceHistory(device, force: true) }
+                }
             }.background(SolarTheme.ink)
                 .navigationTitle(device.title).navigationBarTitleDisplayMode(.inline)
                 .toolbar {

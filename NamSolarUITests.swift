@@ -497,6 +497,73 @@ final class NamSolarUITests: XCTestCase {
         XCTAssertFalse(app.staticTexts["energy-loaded-range"].label.contains(" – "))
     }
 
+    func testCalendarKeepsBrowsedMonthAcrossLiveTicksAndBothDateFields() {
+        let app = XCUIApplication()
+        app.launchArguments = ["--ui-preview"]
+        app.launch()
+        app.buttons["Lịch sử"].tap()
+        let from = app.buttons["energy-from-date"]
+        XCTAssertTrue(from.waitForExistence(timeout: 10))
+        let original = from.label
+        var calendar = Calendar(identifier: .gregorian)
+        calendar.timeZone = TimeZone(identifier: "Asia/Ho_Chi_Minh")!
+        let previous = calendar.date(byAdding: .month, value: -1, to: calendar.dateInterval(of: .month, for: Date())!.start)!
+        let formatter = DateFormatter()
+        formatter.calendar = calendar
+        formatter.timeZone = calendar.timeZone
+        formatter.locale = Locale(identifier: "en_US_POSIX")
+        formatter.dateFormat = "MM/yyyy"
+        let month = formatter.string(from: previous)
+        formatter.dateFormat = "dd/MM/yyyy"
+        let day = calendar.date(byAdding: .day, value: 4, to: previous)!
+        let selectedDay = formatter.string(from: day)
+        from.tap()
+        XCTAssertTrue(app.buttons["energy-calendar-previous"].waitForExistence(timeout: 5))
+        app.buttons["energy-calendar-previous"].tap()
+        XCTAssertEqual(app.staticTexts["energy-calendar-month"].label, month)
+        Thread.sleep(forTimeInterval: 6.5) // The underlying live page ticks every two seconds.
+        XCTAssertEqual(app.staticTexts["energy-calendar-month"].label, month)
+        saveScreenshot("NamSolar-calendar-previous-month-after-live-ticks-test-data")
+        app.buttons["energy-calendar-day-" + selectedDay].tap()
+        XCTAssertTrue(app.staticTexts["energy-calendar-selection"].label.contains(selectedDay))
+        app.buttons["energy-calendar-cancel"].tap()
+        XCTAssertEqual(from.label, original)
+        from.tap()
+        app.buttons["energy-calendar-previous"].tap()
+        app.buttons["energy-calendar-day-" + selectedDay].tap()
+        app.buttons["energy-calendar-confirm"].tap()
+        XCTAssertTrue(from.label.contains(selectedDay))
+        XCTAssertTrue(app.staticTexts["energy-unapplied"].waitForExistence(timeout: 5))
+        app.buttons["energy-apply"].tap()
+        XCTAssertTrue(app.staticTexts["energy-loaded-range"].waitForExistence(timeout: 5))
+        XCTAssertEqual(app.staticTexts["energy-loaded-range"].label, selectedDay)
+        app.buttons["energy-last-seven"].tap()
+        app.buttons["energy-through-date"].tap()
+        app.buttons["energy-calendar-previous"].tap()
+        Thread.sleep(forTimeInterval: 6.5)
+        XCTAssertEqual(app.staticTexts["energy-calendar-month"].label, month)
+        app.buttons["energy-calendar-day-" + selectedDay].tap()
+        app.buttons["energy-calendar-confirm"].tap()
+        XCTAssertTrue(app.buttons["energy-through-date"].label.contains(selectedDay))
+        XCTAssertTrue(app.staticTexts["energy-unapplied"].exists)
+    }
+
+    func testPullingMainPagesDoesNotShowRefreshAndManualRecoveryRemains() {
+        let app = XCUIApplication()
+        app.launchArguments = ["--ui-preview"]
+        app.launch()
+        for tab in ["Tổng quan", "Pin", "Lịch sử", "Hệ thống"] {
+            app.buttons[tab].tap()
+            app.swipeDown()
+            XCTAssertEqual(app.activityIndicators.count, 0)
+            XCTAssertTrue(app.buttons[tab].exists)
+        }
+        XCTAssertTrue(app.buttons["Kết nối lại"].exists)
+        app.buttons["Lịch sử"].tap()
+        XCTAssertTrue(app.buttons["energy-apply"].waitForExistence(timeout: 5))
+        XCTAssertTrue(app.buttons["energy-from-date"].isHittable)
+    }
+
     func testEnergyEmptyAndFailedRequestsNeverShowSyntheticZeroTotals() {
         for flag in ["--ui-energy-empty", "--ui-energy-error"] {
             let app = XCUIApplication()
