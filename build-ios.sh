@@ -4,6 +4,9 @@ cd "$(dirname "$0")"
 mkdir -p build
 collect_evidence() {
   mkdir -p build/screenshots/compact
+  if [[ -d build/GestureSmokeResults.xcresult ]]; then
+    xcrun xcresulttool export attachments --path build/GestureSmokeResults.xcresult --output-path build/screenshots/gesture-smoke || true
+  fi
   if [[ -d build/TestResults.xcresult ]]; then
     xcrun xcresulttool export attachments --path build/TestResults.xcresult --output-path build/screenshots || true
   fi
@@ -41,6 +44,12 @@ swift test 2>&1 | tee build/core-tests.log
 simulator=$(xcrun simctl list devices available -j | python3 -c 'import json,sys; d=json.load(sys.stdin)["devices"]; ids=[v["udid"] for k,vs in d.items() if "iOS-26" in k for v in vs if "iPhone" in v["name"] and v["isAvailable"]]; print(ids[0] if ids else "")')
 if [[ -z "$simulator" ]]; then echo "No iOS 26 iPhone simulator is installed." >&2; exit 1; fi
 boot_simulator "$simulator" 2>&1 | tee build/simulator-startup.log
+xcodebuild test -project NamSolar.xcodeproj -scheme NamSolar -configuration Debug \
+  -destination "platform=iOS Simulator,id=$simulator" -parallel-testing-enabled NO -derivedDataPath build/DerivedData \
+  -only-testing:NamSolarTests/SolarChartTouchTests \
+  -only-testing:NamSolarUITests/NamSolarUITests/testZoomedSOCSwipesPanWithoutChangingZoomAndInspectorStaysAbovePlot \
+  -only-testing:NamSolarUITests/NamSolarUITests/testBatteryPercentAndCellChartsCanBeExpandedAndInspected \
+  -resultBundlePath build/GestureSmokeResults.xcresult CODE_SIGNING_ALLOWED=NO 2>&1 | tee build/gesture-smoke-tests.log
 xcodebuild test -project NamSolar.xcodeproj -scheme NamSolar -configuration Debug \
   -destination "platform=iOS Simulator,id=$simulator" -parallel-testing-enabled NO -derivedDataPath build/DerivedData \
   -resultBundlePath build/TestResults.xcresult CODE_SIGNING_ALLOWED=NO 2>&1 | tee build/ios-tests.log

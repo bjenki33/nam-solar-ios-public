@@ -46,8 +46,6 @@ final class SolarChartTouchView: UIView, UIGestureRecognizerDelegate {
         tapRecognizer.require(toFail: doubleTapRecognizer)
         tapRecognizer.require(toFail: holdRecognizer)
         doubleTapRecognizer.require(toFail: holdRecognizer)
-        tapRecognizer.require(toFail: panRecognizer)
-        doubleTapRecognizer.require(toFail: panRecognizer)
         let recognizers: [UIGestureRecognizer] = [holdRecognizer, pinchRecognizer, tapRecognizer, doubleTapRecognizer, panRecognizer]
         for recognizer in recognizers {
             recognizer.delegate = self
