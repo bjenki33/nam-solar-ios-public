@@ -27,14 +27,14 @@ struct SolarHistoryDatePicker: View {
                 VStack(spacing: 16) {
                     HStack {
                         Button { draft.moveMonth(-1) } label: {
-                            Image(systemName: "chevron.left").frame(width: 44, height: 44)
+                            Image(systemName: "chevron.left").frame(width: 44, height: 44).contentShape(Rectangle())
                         }.accessibilityLabel("Tháng trước").accessibilityIdentifier("energy-calendar-previous")
                         Spacer(minLength: 0)
                         Text(draft.monthTitle).font(.system(size: 20, weight: .semibold)).monospacedDigit()
                             .accessibilityIdentifier("energy-calendar-month")
                         Spacer(minLength: 0)
                         Button { draft.moveMonth(1) } label: {
-                            Image(systemName: "chevron.right").frame(width: 44, height: 44)
+                            Image(systemName: "chevron.right").frame(width: 44, height: 44).contentShape(Rectangle())
                         }.disabled(!draft.canMoveForward).accessibilityLabel("Tháng sau")
                             .accessibilityIdentifier("energy-calendar-next")
                     }.buttonStyle(.plain).tint(SolarTheme.sun)
@@ -80,6 +80,7 @@ struct SolarHistoryDatePicker: View {
                 .frame(maxWidth: .infinity, minHeight: 44)
                 .foregroundStyle(selected ? SolarTheme.ink : day > draft.today ? SolarTheme.muted.opacity(0.45) : .white)
                 .background(selected ? SolarTheme.sun : Color.clear, in: RoundedRectangle(cornerRadius: 8))
+                .contentShape(Rectangle())
         }.buttonStyle(.plain).disabled(day > draft.today)
             .accessibilityLabel(draft.label(day)).accessibilityIdentifier("energy-calendar-day-" + draft.label(day))
             .accessibilityAddTraits(selected ? .isSelected : [])

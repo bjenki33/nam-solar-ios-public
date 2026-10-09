@@ -103,7 +103,7 @@ struct SolarEnergyHistoryView: View {
                 Text(SolarCalendarDraft(selection: date, timeZoneID: history.timeZoneID).label(date))
                     .monospacedDigit().padding(.horizontal, 10).padding(.vertical, 8)
                     .background(SolarTheme.sun.opacity(0.1), in: RoundedRectangle(cornerRadius: 7))
-            }.font(.system(size: 15)).frame(minHeight: 44)
+            }.font(.system(size: 15)).frame(minHeight: 44).contentShape(Rectangle())
         }.buttonStyle(.plain).accessibilityIdentifier(id)
     }
 
