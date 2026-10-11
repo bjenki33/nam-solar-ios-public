@@ -2,6 +2,18 @@ import XCTest
 @testable import NamSolar
 
 final class SolarLayoutTests: XCTestCase {
+    func testStatusPrecedesSummaryWithoutChangingDiagramOrOuterMargins() {
+        for summaryHeight in [CGFloat(202), 234, 300] {
+            let m = SolarOverviewMetrics(viewportHeight: 763, summaryHeight: summaryHeight, statusHeight: 17)
+            XCTAssertEqual(m.statusY, 12)
+            XCTAssertEqual(m.summaryY - m.statusY - m.statusHeight, 7)
+            XCTAssertEqual(m.flowY - m.summaryY - m.summaryHeight, 7)
+            XCTAssertEqual(m.flowY, 12 + summaryHeight + 17 + 14)
+            XCTAssertEqual(m.totalHeight, 763)
+            XCTAssertEqual(m.totalHeight - m.flowY - m.flowHeight, 16)
+        }
+    }
+
     func testLargeScreenPreservesBalancedOuterMargins() {
         let m = SolarOverviewMetrics(viewportHeight: 763, summaryHeight: 202, statusHeight: 17)
         XCTAssertEqual(m.totalHeight, 763, accuracy: 0.1)

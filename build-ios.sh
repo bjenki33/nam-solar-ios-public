@@ -49,6 +49,8 @@ xcodebuild test -project NamSolar.xcodeproj -scheme NamSolar -configuration Debu
   -only-testing:NamSolarTests/SolarChartTouchTests \
   -only-testing:NamSolarTests/SolarNavigationTests \
   -only-testing:NamSolarTests/SolarArtworkTests \
+  -only-testing:NamSolarTests/SolarLayoutTests \
+  -only-testing:NamSolarUITests/NamSolarUITests/testBalancedOverviewMarginsWithoutDebugBanner \
   -only-testing:NamSolarUITests/NamSolarUITests/testApprovedHeaderLogoSmallerTabsAndCurrentVersionFooter \
   -only-testing:NamSolarUITests/NamSolarUITests/testZoomedSOCSwipesPanWithoutChangingZoomAndInspectorStaysAbovePlot \
   -only-testing:NamSolarUITests/NamSolarUITests/testBatteryPercentAndCellChartsCanBeExpandedAndInspected \

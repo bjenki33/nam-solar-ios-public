@@ -17,8 +17,9 @@ struct SolarOverviewMetrics {
         flowHeight = max(Self.minimumFlowHeight, viewportHeight - fixedHeight)
     }
 
-    var statusY: CGFloat { Self.topGap + summaryHeight + Self.groupGap }
-    var flowY: CGFloat { statusY + statusHeight + Self.groupGap }
+    var statusY: CGFloat { Self.topGap }
+    var summaryY: CGFloat { statusY + statusHeight + Self.groupGap }
+    var flowY: CGFloat { summaryY + summaryHeight + Self.groupGap }
     var totalHeight: CGFloat { flowY + flowHeight + Self.bottomGap }
 }
 
@@ -29,8 +30,8 @@ struct SolarOverviewLayout: Layout {
     private func metrics(width: CGFloat, subviews: Subviews) -> SolarOverviewMetrics {
         let proposal = ProposedViewSize(width: width, height: nil)
         return SolarOverviewMetrics(viewportHeight: viewportHeight,
-                                    summaryHeight: subviews[0].sizeThatFits(proposal).height,
-                                    statusHeight: subviews[1].sizeThatFits(proposal).height)
+                                    summaryHeight: subviews[1].sizeThatFits(proposal).height,
+                                    statusHeight: subviews[0].sizeThatFits(proposal).height)
     }
 
     func sizeThatFits(proposal: ProposedViewSize, subviews: Subviews, cache: inout ()) -> CGSize {
@@ -42,8 +43,8 @@ struct SolarOverviewLayout: Layout {
     func placeSubviews(in bounds: CGRect, proposal: ProposedViewSize, subviews: Subviews, cache: inout ()) {
         guard subviews.count == 3 else { return }
         let m = metrics(width: bounds.width, subviews: subviews)
-        let origins = [SolarOverviewMetrics.topGap, m.statusY, m.flowY]
-        let heights = [m.summaryHeight, m.statusHeight, m.flowHeight]
+        let origins = [m.statusY, m.summaryY, m.flowY]
+        let heights = [m.statusHeight, m.summaryHeight, m.flowHeight]
         for index in 0..<3 {
             subviews[index].place(at: CGPoint(x: bounds.minX, y: bounds.minY + origins[index]),
                                  anchor: .topLeading,

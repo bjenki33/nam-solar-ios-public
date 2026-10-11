@@ -178,7 +178,7 @@ final class NamSolarUITests: XCTestCase {
         let footer = app.staticTexts["app-version-footer"]
         for _ in 0..<8 { if footer.isHittable { break }; app.swipeUp() }
         XCTAssertTrue(footer.isHittable)
-        XCTAssertTrue(footer.label.contains("Nam Solar 1.4.4 (15)"))
+        XCTAssertTrue(footer.label.contains("Nam Solar 1.4.5 (16)"))
         XCTAssertFalse(footer.label.contains("Nam Solar 1.1 "))
         saveScreenshot("NamSolar-current-version-footer")
     }
@@ -209,10 +209,20 @@ final class NamSolarUITests: XCTestCase {
         XCTAssertTrue(battery.waitForExistence(timeout: 10))
         let pvTile = app.descendants(matching: .any)["daily-pv"].firstMatch
         XCTAssertTrue(pvTile.exists)
-        // Accessibility reports the card's contents inside its 7-point top padding.
-        let gap = pvTile.frame.minY - 7 - app.buttons["Tổng quan"].frame.maxY
-        XCTAssertGreaterThanOrEqual(gap, 10, "Data cards need breathing room below navigation")
-        XCTAssertLessThanOrEqual(gap, 16, "Navigation must not leave an excessive empty band")
+        let status = app.descendants(matching: .any)["overview-status"].firstMatch
+        XCTAssertTrue(status.isHittable)
+        XCTAssertTrue(status.label.contains("Có điện lưới"))
+        XCTAssertEqual(app.descendants(matching: .any).matching(identifier: "overview-status").count, 1)
+        let gap = status.frame.minY - app.buttons["Tổng quan"].frame.maxY
+        XCTAssertGreaterThanOrEqual(gap, 10, "Status needs breathing room below navigation")
+        XCTAssertLessThanOrEqual(gap, 17, "Status must sit directly below the toolbar")
+        // AX card bounds begin inside its existing 7-point top padding.
+        let summaryGap = pvTile.frame.minY - 7 - status.frame.maxY
+        XCTAssertGreaterThanOrEqual(summaryGap, 5, "Status must precede the data cards")
+        XCTAssertLessThanOrEqual(summaryGap, 12, "The status row must not add a large empty band")
+        Thread.sleep(forTimeInterval: 2.5)
+        XCTAssertTrue(status.isHittable)
+        XCTAssertLessThan(status.frame.maxY, pvTile.frame.minY)
         let flow = app.descendants(matching: .any)["energy-flow"].firstMatch
         XCTAssertTrue(flow.exists)
         let summary = app.descendants(matching: .any)["daily-summary"].firstMatch

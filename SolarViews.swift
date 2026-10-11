@@ -54,13 +54,14 @@ struct OverviewView: View {
                 let s = store.snapshot(now: context.date)
                 ScrollView {
                     SolarOverviewLayout(viewportHeight: geometry.size.height) {
+                        DataStatus(snapshot: s, message: store.connectionMessage).padding(.vertical, 2)
+                            .accessibilityIdentifier("overview-status")
                         VStack(spacing: 7) {
                             if store.previewMode && !cleanLayoutPreview {
                                 Text("Dữ liệu kiểm thử").font(.system(size: 10)).foregroundStyle(.orange)
                             }
                             DailySummary(snapshot: s, sourceNote: $sourceNote)
                         }
-                        DataStatus(snapshot: s, message: store.connectionMessage).padding(.vertical, 2)
                         SolarFlowView(snapshot: s, selection: $selection)
                     }.padding(.horizontal, 8)
                 }

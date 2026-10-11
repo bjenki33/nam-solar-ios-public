@@ -1,5 +1,9 @@
 # Nam Solar for iPhone
 
+Version 1.4.5 moves the overview clock/date/grid-status row directly below the
+toolbar and above the daily metric cards. Fonts, outer margins, diagram size,
+header logo, authentication and chart/data behavior remain unchanged.
+
 Version 1.4.4 uses the owner's approved NAM SOLAR header logo, enlarged on the
 left with smaller 11pt tab labels. The toolbar remains 58pt tall. The home-screen
 icon, dashboard layout, authentication and all data/chart behavior are unchanged.
