@@ -228,8 +228,10 @@ final class NamSolarUITests: XCTestCase {
         XCTAssertLessThan(status.frame.maxY, pvTile.frame.minY)
         let flow = app.descendants(matching: .any)["energy-flow"].firstMatch
         XCTAssertTrue(flow.exists)
-        let upperGap = pvTile.frame.minY - 7 - navigationBottom
+        // Compare group boundaries, not a Label's font-dependent accessibility box.
+        let upperGap = summary.frame.minY - navigationBottom
         let lowerGap = flow.frame.minY - summary.frame.maxY
+        print("OVERVIEW GAPS toolbarBottom=\(navigationBottom) summary=\(summary.frame) flow=\(flow.frame) upper=\(upperGap) lower=\(lowerGap)")
         XCTAssertEqual(upperGap, lowerGap, accuracy: 1, "Toolbar-to-cards and cards-to-diagram gaps must match")
         XCTAssertGreaterThanOrEqual(lowerGap, 30, "Lower gap must balance the complete clock/date band")
         XCTAssertLessThanOrEqual(lowerGap, 48, "Do not add an oversized empty band")
