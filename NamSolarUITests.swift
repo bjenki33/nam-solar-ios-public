@@ -178,7 +178,7 @@ final class NamSolarUITests: XCTestCase {
         let footer = app.staticTexts["app-version-footer"]
         for _ in 0..<8 { if footer.isHittable { break }; app.swipeUp() }
         XCTAssertTrue(footer.isHittable)
-        XCTAssertTrue(footer.label.contains("Nam Solar 1.4.7 (18)"))
+        XCTAssertTrue(footer.label.contains("Nam Solar 1.4.8 (19)"))
         XCTAssertFalse(footer.label.contains("Nam Solar 1.1 "))
         saveScreenshot("NamSolar-current-version-footer")
     }
@@ -215,14 +215,14 @@ final class NamSolarUITests: XCTestCase {
         XCTAssertEqual(app.descendants(matching: .any).matching(identifier: "overview-status").count, 1)
         let navigationBottom = app.buttons["Tổng quan"].frame.maxY
         let statusGap = status.frame.minY - navigationBottom
-        XCTAssertGreaterThanOrEqual(statusGap, 10, "Status needs breathing room below navigation")
-        XCTAssertLessThanOrEqual(statusGap, 17, "Status must sit directly below the toolbar")
+        XCTAssertGreaterThanOrEqual(statusGap, 4, "Status needs breathing room below navigation")
+        XCTAssertLessThanOrEqual(statusGap, 11, "Keep the status band more compact")
         let summary = app.descendants(matching: .any)["daily-summary"].firstMatch
         XCTAssertTrue(summary.exists)
         // AX card bounds begin inside its existing 7-point top padding.
         let summaryGap = pvTile.frame.minY - 7 - status.frame.maxY
-        XCTAssertGreaterThanOrEqual(summaryGap, 5, "Status must precede the daily cards")
-        XCTAssertLessThanOrEqual(summaryGap, 12, "The status row must not add a large empty band")
+        XCTAssertGreaterThanOrEqual(summaryGap, 3, "Status must precede the daily cards")
+        XCTAssertLessThanOrEqual(summaryGap, 10, "The status row must not add a large empty band")
         Thread.sleep(forTimeInterval: 2.5)
         XCTAssertTrue(status.isHittable)
         XCTAssertLessThan(status.frame.maxY, pvTile.frame.minY)
@@ -233,8 +233,8 @@ final class NamSolarUITests: XCTestCase {
         let lowerGap = flow.frame.minY - summary.frame.maxY
         print("OVERVIEW GAPS toolbarBottom=\(navigationBottom) summary=\(summary.frame) flow=\(flow.frame) upper=\(upperGap) lower=\(lowerGap)")
         XCTAssertEqual(upperGap, lowerGap, accuracy: 1, "Toolbar-to-cards and cards-to-diagram gaps must match")
-        XCTAssertGreaterThanOrEqual(lowerGap, 30, "Lower gap must balance the complete clock/date band")
-        XCTAssertLessThanOrEqual(lowerGap, 48, "Do not add an oversized empty band")
+        XCTAssertGreaterThanOrEqual(lowerGap, 24, "Leave room for the readable clock/date band")
+        XCTAssertLessThanOrEqual(lowerGap, 32, "Section gaps must be smaller than the previous 36-point band")
         saveScreenshot("NamSolar-overview-equal-gaps-before-scroll")
         XCTAssertGreaterThanOrEqual(pvTile.frame.height, 54, "Larger metric type and row spacing must be retained")
         XCTAssertGreaterThanOrEqual(summary.frame.height, 215, "Summary cards must have more visual weight")
@@ -243,8 +243,10 @@ final class NamSolarUITests: XCTestCase {
         if flow.frame.maxY > app.windows.firstMatch.frame.maxY - 14 { app.swipeUp() }
         let screen = app.windows.firstMatch.frame
         let bottomGap = screen.maxY - flow.frame.maxY
-        XCTAssertGreaterThanOrEqual(bottomGap, 14, "Diagram must retain a visible bottom margin")
-        XCTAssertLessThanOrEqual(bottomGap, 18, "Bottom margin must not leave the diagram floating")
+        print("OVERVIEW THREE GAPS upper=\(upperGap) middle=\(lowerGap) bottom=\(bottomGap) screen=\(screen) flow=\(flow.frame)")
+        XCTAssertEqual(bottomGap, upperGap, accuracy: 1, "Bottom margin must match both other section gaps")
+        XCTAssertGreaterThanOrEqual(bottomGap, 24, "Diagram must retain the shared visible bottom margin")
+        XCTAssertLessThanOrEqual(bottomGap, 32, "Bottom margin must not leave the diagram floating")
         XCTAssertLessThanOrEqual(battery.frame.maxY, flow.frame.maxY, "Battery must stay inside the diagram")
         XCTAssertTrue(battery.isHittable)
         XCTAssertFalse(app.staticTexts["Dữ liệu kiểm thử"].exists)
