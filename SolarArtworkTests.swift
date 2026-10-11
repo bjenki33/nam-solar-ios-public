@@ -71,10 +71,12 @@ final class SolarArtworkTests: XCTestCase {
         XCTAssertGreaterThan(greenPixels, 35, "Preserve the green leaf; reject the obsolete blue/gold icon")
         for (x, y) in [(0, 0), (63, 0), (0, 63), (63, 63), (0, 32), (63, 32), (32, 0), (32, 63)] {
             let offset = (y * 64 + x) * 4
-            XCTAssertLessThanOrEqual(abs(Int(rgba[offset]) - 247), 3, "Keep safe light padding around the complete logo")
-            XCTAssertLessThanOrEqual(abs(Int(rgba[offset + 1]) - 249), 3)
-            XCTAssertLessThanOrEqual(abs(Int(rgba[offset + 2]) - 252), 3)
+            XCTAssertGreaterThan(Double(rgba[offset + 2]), Double(rgba[offset]) * 1.4,
+                                 "Safe edges must retain the old-icon blue background, never white")
+            XCTAssertGreaterThan(rgba[offset + 2], 180)
         }
+        XCTAssertGreaterThan(abs(Int(rgba[(63 * 64 + 32) * 4 + 1]) - Int(rgba[32 * 4 + 1])), 100,
+                             "Preserve light-top/dark-bottom gradient rather than a flat blue tile")
         let attachment = XCTAttachment(image: image)
         attachment.name = "NamSolar-packaged-home-screen-icon"
         attachment.lifetime = .keepAlways

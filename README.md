@@ -87,7 +87,8 @@ Run `python3 verify-ipa.py <ipa-path>` to inspect the Release package.
 ## Artwork and Licensing
 
 `nam-solar-app-icon.png` is the approved NAM SOLAR header logo centered at
-84 percent on an opaque 1024px light square (#F7F9FC). The artwork is not
+84 percent on an opaque 1024px blue gradient square (#65D7FC to #0252E2),
+sampled from the old icon's light top and dark bottom. The artwork is not
 redrawn or clipped; system corner masks remain separate. Do not replace
 it when editing other UI.
 
