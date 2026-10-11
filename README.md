@@ -1,5 +1,10 @@
 # Nam Solar for iPhone
 
+Version 1.4.6 / build 17 uses the approved NAM SOLAR logo as the home-screen
+icon. The overview clock/date/grid-status returns between the daily summary
+and energy-flow diagram. Toolbar, type, margins, diagram size, charts and
+authentication are unchanged. Android intentionally keeps its status at the top.
+
 Version 1.4.5 moves the overview clock/date/grid-status row directly below the
 toolbar and above the daily metric cards. Fonts, outer margins, diagram size,
 header logo, authentication and chart/data behavior remain unchanged.
@@ -81,9 +86,10 @@ Run `python3 verify-ipa.py <ipa-path>` to inspect the Release package.
 
 ## Artwork and Licensing
 
-`nam-solar-app-icon.png` is the owner's chosen borderless icon. Do not replace
-it when editing other UI. SHA256:
-`1b2b33d8ac64f6016efeae784324a8c9f58fc28430e60a02ad3437628cec5167`.
+`nam-solar-app-icon.png` is the approved NAM SOLAR header logo centered at
+84 percent on an opaque 1024px light square (#F7F9FC). The artwork is not
+redrawn or clipped; system corner masks remain separate. Do not replace
+it when editing other UI.
 
 `nam-solar-header-logo.png` is the separately approved transparent header logo,
 identical to the Android 1.0.4 artwork. SHA256:

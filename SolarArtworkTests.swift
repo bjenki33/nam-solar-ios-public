@@ -41,7 +41,7 @@ final class SolarArtworkTests: XCTestCase {
         add(attachment)
     }
 
-    func testActualHomeScreenIconIsBundledOpaqueAndUsesTheUserBlueGoldArtwork() throws {
+    func testActualHomeScreenIconIsOpaqueAndUsesTheApprovedNAMSolarLogo() throws {
         let icons = try XCTUnwrap(Bundle.main.infoDictionary?["CFBundleIcons"] as? [String: Any])
         let primary = try XCTUnwrap(icons["CFBundlePrimaryIcon"] as? [String: Any])
         let files = try XCTUnwrap(primary["CFBundleIconFiles"] as? [String])
@@ -58,20 +58,22 @@ final class SolarArtworkTests: XCTestCase {
             return true
         }
         XCTAssertTrue(rendered)
-        var bluePixels = 0, warmPixels = 0
+        var bluePixels = 0, warmPixels = 0, greenPixels = 0
         for offset in stride(from: 0, to: rgba.count, by: 4) {
             XCTAssertEqual(rgba[offset + 3], 255, "Home-screen icon must have no transparent corners")
             let r = Double(rgba[offset]), g = Double(rgba[offset + 1]), b = Double(rgba[offset + 2])
             if b > 120 && b > r * 1.3 && b > g * 1.05 { bluePixels += 1 }
             if r > 150 && r > g * 1.1 && g > b * 1.2 { warmPixels += 1 }
+            if g > 90 && g > r * 1.15 && g > b * 1.3 { greenPixels += 1 }
         }
-        XCTAssertGreaterThan(bluePixels, 600, "Use the user's blue icon, not either rejected generated icon")
-        XCTAssertGreaterThan(warmPixels, 100, "User's gold sun must survive downscaling")
+        XCTAssertGreaterThan(bluePixels, 200, "Preserve the approved blue solar roofs")
+        XCTAssertGreaterThan(warmPixels, 300, "Preserve the sun and NAM SOLAR lettering")
+        XCTAssertGreaterThan(greenPixels, 35, "Preserve the green leaf; reject the obsolete blue/gold icon")
         for (x, y) in [(0, 0), (63, 0), (0, 63), (63, 63), (0, 32), (63, 32), (32, 0), (32, 63)] {
             let offset = (y * 64 + x) * 4
-            XCTAssertGreaterThan(Double(rgba[offset + 2]), Double(rgba[offset]) * 1.4,
-                                 "Edges must be full-bleed blue, not the original blurred backdrop/frame")
-            XCTAssertGreaterThan(rgba[offset + 2], 100)
+            XCTAssertLessThanOrEqual(abs(Int(rgba[offset]) - 247), 3, "Keep safe light padding around the complete logo")
+            XCTAssertLessThanOrEqual(abs(Int(rgba[offset + 1]) - 249), 3)
+            XCTAssertLessThanOrEqual(abs(Int(rgba[offset + 2]) - 252), 3)
         }
         let attachment = XCTAttachment(image: image)
         attachment.name = "NamSolar-packaged-home-screen-icon"

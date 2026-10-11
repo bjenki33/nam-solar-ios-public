@@ -19,7 +19,7 @@ context.interpolationQuality = .high
 let sourceSide = min(image.width, image.height)
 let crop = CGRect(x: (image.width - sourceSide) / 2,
                   y: (image.height - sourceSide) / 2, width: sourceSide, height: sourceSide)
-// Crop only the outer backdrop to square; never stretch or redraw the user's artwork.
+// Source already contains the complete approved logo on an opaque, padded square.
 guard let cropped = image.cropping(to: crop) else { fatalError("Cannot crop source icon") }
 context.draw(cropped, in: CGRect(x: 0, y: 0, width: size, height: size))
 guard let bitmap = context.makeImage() else { fatalError("Cannot create production icon") }
@@ -34,7 +34,7 @@ let contents = """
 """
 try Data(contents.utf8).write(to: file.appendingPathComponent("Contents.json"))
 
-// Header artwork stays separate from the unchanged home-screen app icon.
+// The original transparent header stays separate from the opaque launcher tile.
 for name in ["solar-pv", "solar-grid", "solar-home", "solar-battery", "solar-inverter", "solar-sun", "nam-solar-header-logo"] {
     let folder = URL(fileURLWithPath: "Assets.xcassets/\(name).imageset")
     try FileManager.default.createDirectory(at: folder, withIntermediateDirectories: true)
