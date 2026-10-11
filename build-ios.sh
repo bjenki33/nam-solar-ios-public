@@ -47,6 +47,9 @@ boot_simulator "$simulator" 2>&1 | tee build/simulator-startup.log
 xcodebuild test -project NamSolar.xcodeproj -scheme NamSolar -configuration Debug \
   -destination "platform=iOS Simulator,id=$simulator" -parallel-testing-enabled NO -derivedDataPath build/DerivedData \
   -only-testing:NamSolarTests/SolarChartTouchTests \
+  -only-testing:NamSolarTests/SolarNavigationTests \
+  -only-testing:NamSolarTests/SolarArtworkTests \
+  -only-testing:NamSolarUITests/NamSolarUITests/testApprovedHeaderLogoSmallerTabsAndCurrentVersionFooter \
   -only-testing:NamSolarUITests/NamSolarUITests/testZoomedSOCSwipesPanWithoutChangingZoomAndInspectorStaysAbovePlot \
   -only-testing:NamSolarUITests/NamSolarUITests/testBatteryPercentAndCellChartsCanBeExpandedAndInspected \
   -only-testing:NamSolarUITests/NamSolarUITests/testEnergyDayAndInclusiveRangeChartsAndDateControls \

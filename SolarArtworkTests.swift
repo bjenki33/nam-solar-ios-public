@@ -17,6 +17,30 @@ final class SolarArtworkTests: XCTestCase {
         XCTAssertFalse([CGImageAlphaInfo.none, .noneSkipFirst, .noneSkipLast].contains(cg.alphaInfo))
     }
 
+    func testApprovedHeaderLogoIsBundledSeparateFromTheHomeScreenIcon() throws {
+        let image = try XCTUnwrap(UIImage(named: "nam-solar-header-logo", in: .main, compatibleWith: nil))
+        let cg = try XCTUnwrap(image.cgImage)
+        XCTAssertEqual(cg.width, 1254)
+        XCTAssertEqual(cg.height, 1254)
+        XCTAssertFalse([CGImageAlphaInfo.none, .noneSkipFirst, .noneSkipLast].contains(cg.alphaInfo))
+        var rgba = [UInt8](repeating: 0, count: 64 * 64 * 4)
+        let rendered = rgba.withUnsafeMutableBytes { bytes -> Bool in
+            guard let context = CGContext(data: bytes.baseAddress, width: 64, height: 64, bitsPerComponent: 8,
+                bytesPerRow: 64 * 4, space: CGColorSpaceCreateDeviceRGB(),
+                bitmapInfo: CGImageAlphaInfo.premultipliedLast.rawValue | CGBitmapInfo.byteOrder32Big.rawValue) else { return false }
+            context.draw(cg, in: CGRect(x: 0, y: 0, width: 64, height: 64))
+            return true
+        }
+        XCTAssertTrue(rendered)
+        for (x, y) in [(0, 0), (63, 0), (0, 63), (63, 63)] {
+            XCTAssertLessThan(rgba[(y * 64 + x) * 4 + 3], 8, "No white tile behind the header logo")
+        }
+        let attachment = XCTAttachment(image: image)
+        attachment.name = "NamSolar-approved-header-logo"
+        attachment.lifetime = .keepAlways
+        add(attachment)
+    }
+
     func testActualHomeScreenIconIsBundledOpaqueAndUsesTheUserBlueGoldArtwork() throws {
         let icons = try XCTUnwrap(Bundle.main.infoDictionary?["CFBundleIcons"] as? [String: Any])
         let primary = try XCTUnwrap(icons["CFBundlePrimaryIcon"] as? [String: Any])

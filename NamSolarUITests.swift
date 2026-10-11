@@ -118,40 +118,57 @@ final class NamSolarUITests: XCTestCase {
         saveScreenshot("NamSolar-diagnostics")
     }
 
-    func testLargerWebNavigationCenteredBrandAndCurrentVersionFooter() {
+    func testApprovedHeaderLogoSmallerTabsAndCurrentVersionFooter() {
         let app = XCUIApplication()
         app.launchArguments = ["--ui-preview", "--ui-layout-clean"]
         app.launch()
-        let nam = app.staticTexts["brand-nam"]
-        let solar = app.staticTexts["brand-solar"]
-        XCTAssertTrue(nam.waitForExistence(timeout: 10))
-        XCTAssertTrue(solar.exists)
-        XCTAssertEqual(nam.label, "NAM")
-        XCTAssertEqual(solar.label, "SOLAR")
-        XCTAssertEqual(nam.frame.midX, solar.frame.midX, accuracy: 0.5)
-        XCTAssertLessThan(nam.frame.maxY, solar.frame.minY + 1)
+        let logo = app.images["brand-logo"]
+        XCTAssertTrue(logo.waitForExistence(timeout: 10))
+        XCTAssertEqual(logo.label, "Nam Solar")
+        XCTAssertEqual(logo.frame.width, 54, accuracy: 1)
+        XCTAssertEqual(logo.frame.height, 54, accuracy: 1)
+        let header = app.descendants(matching: .any)["solar-navigation"].firstMatch
+        XCTAssertTrue(header.exists)
+        XCTAssertEqual(header.frame.height, 58, accuracy: 1)
+        XCTAssertEqual(logo.frame.midX, 36, accuracy: 1)
+        XCTAssertEqual(logo.frame.midY, header.frame.midY, accuracy: 1)
         let items = [("Tổng quan", "solar-power"), ("Pin", "battery-heart-variant"),
                      ("Lịch sử", "chart-line"), ("Hệ thống", "lan-check")]
-        var lastFrame = solar.frame
+        var lastFrame = logo.frame
         for (title, icon) in items {
             let button = app.buttons[title]
             let label = app.staticTexts["tab-label-" + icon]
             XCTAssertTrue(button.isHittable)
             XCTAssertTrue(label.exists)
             XCTAssertEqual(label.label, title)
-            XCTAssertGreaterThanOrEqual(label.frame.height, 14, "Tab labels must not retain the former 9pt font")
+            XCTAssertGreaterThanOrEqual(label.frame.height, 12)
+            XCTAssertLessThanOrEqual(label.frame.height, 14, "Use smaller, single-line tab labels")
+            XCTAssertEqual(button.frame.height, 58, accuracy: 1)
             // Accessibility button frames round through Float; text frames retain Double precision.
             XCTAssertGreaterThanOrEqual(label.frame.minX + 0.01, button.frame.minX)
             XCTAssertLessThanOrEqual(label.frame.maxX, button.frame.maxX + 0.01)
             XCTAssertGreaterThan(label.frame.minX, lastFrame.maxX)
             lastFrame = label.frame
         }
-        saveScreenshot("NamSolar-web-navigation-centered-brand")
+        saveScreenshot("NamSolar-approved-header-logo-smaller-tabs")
+        for title in ["Pin", "Lịch sử", "Hệ thống", "Tổng quan"] {
+            app.buttons[title].tap()
+            XCTAssertTrue(logo.exists)
+            XCTAssertEqual(header.frame.height, 58, accuracy: 1)
+            XCTAssertEqual(logo.frame.height, 54, accuracy: 1)
+            saveScreenshot("NamSolar-header-" + title)
+        }
+        app.buttons["Tài khoản"].tap()
+        XCTAssertTrue(app.buttons["Đăng xuất"].waitForExistence(timeout: 5))
+        let cancel = app.buttons.matching(NSPredicate(format: "label IN %@", ["Hủy", "Cancel"])).firstMatch
+        XCTAssertTrue(cancel.exists)
+        cancel.tap()
+        XCTAssertTrue(logo.exists)
         app.buttons["Hệ thống"].tap()
         let footer = app.staticTexts["app-version-footer"]
         for _ in 0..<8 { if footer.isHittable { break }; app.swipeUp() }
         XCTAssertTrue(footer.isHittable)
-        XCTAssertTrue(footer.label.contains("Nam Solar 1.4.3 (14)"))
+        XCTAssertTrue(footer.label.contains("Nam Solar 1.4.4 (15)"))
         XCTAssertFalse(footer.label.contains("Nam Solar 1.1 "))
         saveScreenshot("NamSolar-current-version-footer")
     }

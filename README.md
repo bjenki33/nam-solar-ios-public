@@ -1,5 +1,9 @@
 # Nam Solar for iPhone
 
+Version 1.4.4 uses the owner's approved NAM SOLAR header logo, enlarged on the
+left with smaller 11pt tab labels. The toolbar remains 58pt tall. The home-screen
+icon, dashboard layout, authentication and all data/chart behavior are unchanged.
+
 Version 1.4.3 also isolates the history calendar's draft/month from live updates.
 Date selection is confirmed explicitly before applying a history request. Pull-to-refresh
 has been removed; live WebSocket updates, automatic reconnection and explicit recovery/history buttons remain.
@@ -39,7 +43,8 @@ private repository, its history and personal work journal remain private.
 ## Preserved Features
 
 - Web-matching MDI navigation icons: solar-power, battery-heart-variant,
-  chart-line and lan-check. Tab labels are 12pt; NAM is centered over SOLAR.
+  chart-line and lan-check. Tab labels are 11pt; the approved 54pt header logo
+  has a 72pt left slot within the unchanged 58pt toolbar.
 - The system footer reads the version and build from the app bundle.
 - The home-screen icon is the owner's supplied design with its outer frame
   removed. Its blue background reaches all four square edges; iOS masks corners.
@@ -74,6 +79,10 @@ Run `python3 verify-ipa.py <ipa-path>` to inspect the Release package.
 `nam-solar-app-icon.png` is the owner's chosen borderless icon. Do not replace
 it when editing other UI. SHA256:
 `1b2b33d8ac64f6016efeae784324a8c9f58fc28430e60a02ad3437628cec5167`.
+
+`nam-solar-header-logo.png` is the separately approved transparent header logo,
+identical to the Android 1.0.4 artwork. SHA256:
+`a40b12c09e6b0e32044446446781e6166c8f224b60381ed92f5ee3f0847dc1ee`.
 
 MDI vectors retain their attribution and Apache 2.0 notices in
 `SolarMetricIcon-NOTICE.txt`, `MDI-LICENSE.txt` and `Apache-2.0.txt`.

@@ -26,11 +26,22 @@ enum SolarNavigationKind: String, CaseIterable {
 }
 
 enum SolarNavigationLayout {
-    static let brandWidth: CGFloat = 42
+    static let brandWidth: CGFloat = 72
+    static let brandSize: CGFloat = 54
     static let accountWidth: CGFloat = 26
     static let iconSize: CGFloat = 25
-    static let labelSize: CGFloat = 12
+    static let labelSize: CGFloat = 11
     static let height: CGFloat = 58
+}
+
+struct SolarHeaderBrand: View {
+    var body: some View {
+        Image("nam-solar-header-logo").resizable().renderingMode(.original)
+            .interpolation(.high).scaledToFit()
+            .frame(width: SolarNavigationLayout.brandSize, height: SolarNavigationLayout.brandSize)
+            .accessibilityLabel("Nam Solar").accessibilityIdentifier("brand-logo")
+            .frame(width: SolarNavigationLayout.brandWidth, height: SolarNavigationLayout.height)
+    }
 }
 
 struct SolarNavigationIcon: View {

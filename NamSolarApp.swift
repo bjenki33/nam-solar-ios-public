@@ -53,12 +53,7 @@ struct SolarTabs: View {
             }.frame(maxWidth: .infinity, maxHeight: .infinity)
         }.safeAreaInset(edge: .top, spacing: 0) {
             HStack(spacing: 0) {
-                VStack(spacing: 1) {
-                    Text("NAM").accessibilityIdentifier("brand-nam")
-                    Text("SOLAR").accessibilityIdentifier("brand-solar")
-                }.font(.system(size: 9, weight: .bold)).tracking(1)
-                    .foregroundStyle(SolarTheme.sun).frame(width: SolarNavigationLayout.brandWidth)
-                    .accessibilityElement(children: .contain)
+                SolarHeaderBrand()
                 ForEach(SolarTab.allCases, id: \.self) { tab in
                     Button { selection = tab } label: {
                         VStack(spacing: 4) {
@@ -73,7 +68,9 @@ struct SolarTabs: View {
                 }
                 Button { confirmLogout = true } label: { Image(systemName: "ellipsis").rotationEffect(.degrees(90)).frame(width: SolarNavigationLayout.accountWidth, height: SolarNavigationLayout.height).foregroundStyle(SolarTheme.muted) }
                     .accessibilityLabel("Tài khoản")
-            }.background(SolarTheme.panel).overlay(alignment: .bottom) { Rectangle().fill(SolarTheme.border).frame(height: 0.5) }
+            }.frame(height: SolarNavigationLayout.height)
+                .background(SolarTheme.panel).overlay(alignment: .bottom) { Rectangle().fill(SolarTheme.border).frame(height: 0.5) }
+                .accessibilityElement(children: .contain).accessibilityIdentifier("solar-navigation")
         }.confirmationDialog("Đăng xuất Nam Solar?", isPresented: $confirmLogout, titleVisibility: .visible) {
             Button("Đăng xuất", role: .destructive) { Task { await store.logout() } }
         }

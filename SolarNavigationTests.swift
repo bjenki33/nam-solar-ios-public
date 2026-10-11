@@ -56,8 +56,13 @@ final class SolarNavigationTests: XCTestCase {
         }
     }
 
-    func testLabelsAreLargerAndFitEvenTheSmallestPhoneHeader() {
-        XCTAssertGreaterThanOrEqual(SolarNavigationLayout.labelSize, 12)
+    func testLogoAndSmallerLabelsFitWithoutIncreasingHeaderHeight() {
+        XCTAssertEqual(SolarNavigationLayout.height, 58)
+        XCTAssertEqual(SolarNavigationLayout.brandWidth, 72)
+        XCTAssertEqual(SolarNavigationLayout.brandSize, 54)
+        XCTAssertEqual(SolarNavigationLayout.labelSize, 11)
+        XCTAssertLessThan(SolarNavigationLayout.brandSize, SolarNavigationLayout.height)
+        XCTAssertLessThan(SolarNavigationLayout.brandSize, SolarNavigationLayout.brandWidth)
         XCTAssertGreaterThanOrEqual(SolarNavigationLayout.iconSize, 24)
         let columnWidth = (CGFloat(320) - SolarNavigationLayout.brandWidth - SolarNavigationLayout.accountWidth) / 4
         for tab in SolarTab.allCases {

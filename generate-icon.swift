@@ -34,8 +34,8 @@ let contents = """
 """
 try Data(contents.utf8).write(to: file.appendingPathComponent("Contents.json"))
 
-// Compile dashboard artwork into the asset catalog, not loose bundle files.
-for name in ["solar-pv", "solar-grid", "solar-home", "solar-battery", "solar-inverter", "solar-sun"] {
+// Header artwork stays separate from the unchanged home-screen app icon.
+for name in ["solar-pv", "solar-grid", "solar-home", "solar-battery", "solar-inverter", "solar-sun", "nam-solar-header-logo"] {
     let folder = URL(fileURLWithPath: "Assets.xcassets/\(name).imageset")
     try FileManager.default.createDirectory(at: folder, withIntermediateDirectories: true)
     try Data(contentsOf: URL(fileURLWithPath: "\(name).png")).write(to: folder.appendingPathComponent("\(name).png"))
