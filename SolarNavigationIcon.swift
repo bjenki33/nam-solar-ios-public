@@ -26,7 +26,7 @@ enum SolarNavigationKind: String, CaseIterable {
 }
 
 enum SolarNavigationLayout {
-    static let brandWidth: CGFloat = 72
+    static let brandWidth: CGFloat = 60
     static let brandSize: CGFloat = 54
     static let accountWidth: CGFloat = 26
     static let iconSize: CGFloat = 25

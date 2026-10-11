@@ -129,9 +129,12 @@ final class NamSolarUITests: XCTestCase {
         XCTAssertEqual(logo.frame.height, 54, accuracy: 1)
         let header = app.descendants(matching: .any)["solar-navigation"].firstMatch
         XCTAssertTrue(header.exists)
-        XCTAssertEqual(header.frame.height, 58, accuracy: 1)
-        XCTAssertEqual(logo.frame.midX, 36, accuracy: 1)
-        XCTAssertEqual(logo.frame.midY, header.frame.midY, accuracy: 1)
+        // The header background extends under the status bar; its AX container includes that safe area.
+        let account = app.buttons["Tài khoản"]
+        XCTAssertEqual(account.frame.height, 58, accuracy: 1)
+        XCTAssertEqual(header.frame.maxY, account.frame.maxY, accuracy: 1)
+        XCTAssertEqual(logo.frame.midX, 30, accuracy: 1)
+        XCTAssertEqual(logo.frame.midY, account.frame.midY, accuracy: 1)
         let items = [("Tổng quan", "solar-power"), ("Pin", "battery-heart-variant"),
                      ("Lịch sử", "chart-line"), ("Hệ thống", "lan-check")]
         var lastFrame = logo.frame
@@ -154,15 +157,20 @@ final class NamSolarUITests: XCTestCase {
         for title in ["Pin", "Lịch sử", "Hệ thống", "Tổng quan"] {
             app.buttons[title].tap()
             XCTAssertTrue(logo.exists)
-            XCTAssertEqual(header.frame.height, 58, accuracy: 1)
+            XCTAssertEqual(account.frame.height, 58, accuracy: 1)
+            XCTAssertEqual(header.frame.maxY, account.frame.maxY, accuracy: 1)
             XCTAssertEqual(logo.frame.height, 54, accuracy: 1)
             saveScreenshot("NamSolar-header-" + title)
         }
-        app.buttons["Tài khoản"].tap()
+        account.tap()
         XCTAssertTrue(app.buttons["Đăng xuất"].waitForExistence(timeout: 5))
         let cancel = app.buttons.matching(NSPredicate(format: "label IN %@", ["Hủy", "Cancel"])).firstMatch
-        XCTAssertTrue(cancel.exists)
-        cancel.tap()
+        if cancel.exists { cancel.tap() }
+        else {
+            let dismiss = app.otherElements["PopoverDismissRegion"]
+            XCTAssertTrue(dismiss.exists)
+            dismiss.coordinate(withNormalizedOffset: CGVector(dx: 0.1, dy: 0.2)).tap()
+        }
         XCTAssertTrue(logo.exists)
         app.buttons["Hệ thống"].tap()
         let footer = app.staticTexts["app-version-footer"]

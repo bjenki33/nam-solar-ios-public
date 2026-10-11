@@ -44,7 +44,8 @@ private repository, its history and personal work journal remain private.
 
 - Web-matching MDI navigation icons: solar-power, battery-heart-variant,
   chart-line and lan-check. Tab labels are 11pt; the approved 54pt header logo
-  has a 72pt left slot within the unchanged 58pt toolbar.
+  has a 60pt left slot within the unchanged 58pt toolbar. Each entire tab column
+  remains tappable, including the space around its icon and label.
 - The system footer reads the version and build from the app bundle.
 - The home-screen icon is the owner's supplied design with its outer frame
   removed. Its blue background reaches all four square edges; iOS masks corners.

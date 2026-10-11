@@ -63,6 +63,7 @@ struct SolarTabs: View {
                                 .accessibilityIdentifier("tab-label-" + tab.icon.rawValue)
                         }.foregroundStyle(selection == tab ? SolarTheme.sun : SolarTheme.muted)
                             .frame(maxWidth: .infinity).frame(height: SolarNavigationLayout.height)
+                            .contentShape(Rectangle())
                             .overlay(alignment: .bottom) { if selection == tab { Rectangle().fill(SolarTheme.sun).frame(height: 2).padding(.horizontal, 8) } }
                     }.buttonStyle(.plain).accessibilityLabel(tab.rawValue).accessibilityAddTraits(selection == tab ? .isSelected : [])
                 }
