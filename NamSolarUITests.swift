@@ -178,7 +178,7 @@ final class NamSolarUITests: XCTestCase {
         let footer = app.staticTexts["app-version-footer"]
         for _ in 0..<8 { if footer.isHittable { break }; app.swipeUp() }
         XCTAssertTrue(footer.isHittable)
-        XCTAssertTrue(footer.label.contains("Nam Solar 1.4.6 (17)"))
+        XCTAssertTrue(footer.label.contains("Nam Solar 1.4.7 (18)"))
         XCTAssertFalse(footer.label.contains("Nam Solar 1.1 "))
         saveScreenshot("NamSolar-current-version-footer")
     }
@@ -213,23 +213,27 @@ final class NamSolarUITests: XCTestCase {
         XCTAssertTrue(status.isHittable)
         XCTAssertTrue(status.label.contains("Có điện lưới"))
         XCTAssertEqual(app.descendants(matching: .any).matching(identifier: "overview-status").count, 1)
-        let gap = pvTile.frame.minY - 7 - app.buttons["Tổng quan"].frame.maxY
-        XCTAssertGreaterThanOrEqual(gap, 10, "Cards need breathing room below navigation")
-        XCTAssertLessThanOrEqual(gap, 17, "Daily cards must return directly below the toolbar")
+        let navigationBottom = app.buttons["Tổng quan"].frame.maxY
+        let statusGap = status.frame.minY - navigationBottom
+        XCTAssertGreaterThanOrEqual(statusGap, 10, "Status needs breathing room below navigation")
+        XCTAssertLessThanOrEqual(statusGap, 17, "Status must sit directly below the toolbar")
         let summary = app.descendants(matching: .any)["daily-summary"].firstMatch
         XCTAssertTrue(summary.exists)
         // AX card bounds begin inside its existing 7-point top padding.
-        let summaryGap = status.frame.minY - summary.frame.maxY
-        XCTAssertGreaterThanOrEqual(summaryGap, 5, "Status must follow the complete consumption panel")
+        let summaryGap = pvTile.frame.minY - 7 - status.frame.maxY
+        XCTAssertGreaterThanOrEqual(summaryGap, 5, "Status must precede the daily cards")
         XCTAssertLessThanOrEqual(summaryGap, 12, "The status row must not add a large empty band")
         Thread.sleep(forTimeInterval: 2.5)
         XCTAssertTrue(status.isHittable)
-        XCTAssertGreaterThan(status.frame.minY, summary.frame.maxY)
+        XCTAssertLessThan(status.frame.maxY, pvTile.frame.minY)
         let flow = app.descendants(matching: .any)["energy-flow"].firstMatch
         XCTAssertTrue(flow.exists)
-        let flowGap = flow.frame.minY - status.frame.maxY
-        XCTAssertGreaterThanOrEqual(flowGap, 5, "Status must stay above the diagram")
-        XCTAssertLessThanOrEqual(flowGap, 12, "Preserve the old balanced diagram gap")
+        let upperGap = pvTile.frame.minY - 7 - navigationBottom
+        let lowerGap = flow.frame.minY - summary.frame.maxY
+        XCTAssertEqual(upperGap, lowerGap, accuracy: 1, "Toolbar-to-cards and cards-to-diagram gaps must match")
+        XCTAssertGreaterThanOrEqual(lowerGap, 30, "Lower gap must balance the complete clock/date band")
+        XCTAssertLessThanOrEqual(lowerGap, 48, "Do not add an oversized empty band")
+        saveScreenshot("NamSolar-overview-equal-gaps-before-scroll")
         XCTAssertGreaterThanOrEqual(pvTile.frame.height, 54, "Larger metric type and row spacing must be retained")
         XCTAssertGreaterThanOrEqual(summary.frame.height, 215, "Summary cards must have more visual weight")
         XCTAssertLessThanOrEqual(flow.frame.height, summary.frame.height * 2.25, "Diagram must not stretch disproportionately below the summary")

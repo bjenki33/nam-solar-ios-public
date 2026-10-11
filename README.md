@@ -1,5 +1,11 @@
 # Nam Solar for iPhone
 
+Version 1.4.7 / build 18 moves the overview clock/date/grid-status below the
+toolbar and above the daily cards. The complete toolbar-to-card band (including
+the status row) matches the card-to-diagram gap, using the measured status height.
+Toolbar, logo, card typography, bottom margin and minimum diagram size remain
+unchanged; small viewports scroll rather than shrink or clip. Android is unchanged.
+
 Version 1.4.6 / build 17 uses the approved NAM SOLAR logo as the home-screen
 icon. The overview clock/date/grid-status returns between the daily summary
 and energy-flow diagram. Toolbar, type, margins, diagram size, charts and

@@ -13,13 +13,16 @@ struct SolarOverviewMetrics {
     init(viewportHeight: CGFloat, summaryHeight: CGFloat, statusHeight: CGFloat) {
         self.summaryHeight = summaryHeight
         self.statusHeight = statusHeight
-        let fixedHeight = Self.topGap + summaryHeight + statusHeight + 2 * Self.groupGap + Self.bottomGap
+        let summaryInset = Self.topGap + statusHeight + Self.groupGap
+        let fixedHeight = 2 * summaryInset + summaryHeight + Self.bottomGap
         flowHeight = max(Self.minimumFlowHeight, viewportHeight - fixedHeight)
     }
 
-    var summaryY: CGFloat { Self.topGap }
-    var statusY: CGFloat { summaryY + summaryHeight + Self.groupGap }
-    var flowY: CGFloat { statusY + statusHeight + Self.groupGap }
+    var statusY: CGFloat { Self.topGap }
+    var summaryY: CGFloat { statusY + statusHeight + Self.groupGap }
+    // Include the status band when matching the visible gaps above/below the cards.
+    var summaryToFlowGap: CGFloat { summaryY }
+    var flowY: CGFloat { summaryY + summaryHeight + summaryToFlowGap }
     var totalHeight: CGFloat { flowY + flowHeight + Self.bottomGap }
 }
 
@@ -30,8 +33,8 @@ struct SolarOverviewLayout: Layout {
     private func metrics(width: CGFloat, subviews: Subviews) -> SolarOverviewMetrics {
         let proposal = ProposedViewSize(width: width, height: nil)
         return SolarOverviewMetrics(viewportHeight: viewportHeight,
-                                    summaryHeight: subviews[0].sizeThatFits(proposal).height,
-                                    statusHeight: subviews[1].sizeThatFits(proposal).height)
+                                    summaryHeight: subviews[1].sizeThatFits(proposal).height,
+                                    statusHeight: subviews[0].sizeThatFits(proposal).height)
     }
 
     func sizeThatFits(proposal: ProposedViewSize, subviews: Subviews, cache: inout ()) -> CGSize {
@@ -43,8 +46,8 @@ struct SolarOverviewLayout: Layout {
     func placeSubviews(in bounds: CGRect, proposal: ProposedViewSize, subviews: Subviews, cache: inout ()) {
         guard subviews.count == 3 else { return }
         let m = metrics(width: bounds.width, subviews: subviews)
-        let origins = [m.summaryY, m.statusY, m.flowY]
-        let heights = [m.summaryHeight, m.statusHeight, m.flowHeight]
+        let origins = [m.statusY, m.summaryY, m.flowY]
+        let heights = [m.statusHeight, m.summaryHeight, m.flowHeight]
         for index in 0..<3 {
             subviews[index].place(at: CGPoint(x: bounds.minX, y: bounds.minY + origins[index]),
                                  anchor: .topLeading,
