@@ -243,10 +243,10 @@ final class NamSolarUITests: XCTestCase {
         if flow.frame.maxY > app.windows.firstMatch.frame.maxY - 14 { app.swipeUp() }
         let screen = app.windows.firstMatch.frame
         let bottomGap = screen.maxY - flow.frame.maxY
-        print("OVERVIEW THREE GAPS upper=\(upperGap) middle=\(lowerGap) bottom=\(bottomGap) screen=\(screen) flow=\(flow.frame)")
-        XCTAssertEqual(bottomGap, upperGap, accuracy: 1, "Bottom margin must match both other section gaps")
-        XCTAssertGreaterThanOrEqual(bottomGap, 24, "Diagram must retain the shared visible bottom margin")
-        XCTAssertLessThanOrEqual(bottomGap, 32, "Bottom margin must not leave the diagram floating")
+        print("OVERVIEW COMPACT GAPS upper=\(upperGap) middle=\(lowerGap) bottom=\(bottomGap) screen=\(screen) flow=\(flow.frame)")
+        XCTAssertEqual(bottomGap, 16, accuracy: 1, "Keep the original 16-point bottom margin")
+        XCTAssertGreaterThanOrEqual(bottomGap, 14, "Diagram must retain a visible bottom margin")
+        XCTAssertLessThanOrEqual(bottomGap, 18, "Bottom margin must not leave the diagram floating")
         XCTAssertLessThanOrEqual(battery.frame.maxY, flow.frame.maxY, "Battery must stay inside the diagram")
         XCTAssertTrue(battery.isHittable)
         XCTAssertFalse(app.staticTexts["Dữ liệu kiểm thử"].exists)

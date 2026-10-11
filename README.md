@@ -1,9 +1,9 @@
 # Nam Solar for iPhone
 
-Version 1.4.8 / build 19 reduces the overview spacing and matches all three
-section bands: toolbar-to-cards (including clock/date/grid status), cards-to-diagram,
-and diagram-to-bottom. The shared gap follows the measured status height, normally
-about 28pt instead of 36pt. Toolbar, logo, card type/data and minimum diagram size
+Version 1.4.8 / build 19 reduces the two upper overview gaps: toolbar-to-cards
+(including clock/date/grid status) and cards-to-diagram. Both follow the measured
+status height, normally about 28pt instead of 36pt. The diagram-to-bottom margin
+stays at its original 16pt. Toolbar, logo, card type/data and minimum diagram size
 are unchanged; small viewports scroll to keep devices readable. Android is unchanged.
 
 Version 1.4.7 / build 18 moves the overview clock/date/grid-status below the

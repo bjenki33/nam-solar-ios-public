@@ -3,6 +3,7 @@ import SwiftUI
 struct SolarOverviewMetrics {
     static let topGap: CGFloat = 6
     static let groupGap: CGFloat = 5
+    static let bottomGap: CGFloat = 16
     static let minimumFlowHeight: CGFloat = 300
 
     let summaryHeight: CGFloat
@@ -13,18 +14,17 @@ struct SolarOverviewMetrics {
         self.summaryHeight = summaryHeight
         self.statusHeight = statusHeight
         let sectionGap = Self.topGap + statusHeight + Self.groupGap
-        let fixedHeight = 3 * sectionGap + summaryHeight
+        let fixedHeight = 2 * sectionGap + summaryHeight + Self.bottomGap
         flowHeight = max(Self.minimumFlowHeight, viewportHeight - fixedHeight)
     }
 
     var statusY: CGFloat { Self.topGap }
     var summaryY: CGFloat { statusY + statusHeight + Self.groupGap }
-    // Include the status band and match all three visible section gaps.
+    // Match the upper status band and card-to-diagram gap, keeping the old footer inset.
     var sectionGap: CGFloat { summaryY }
     var summaryToFlowGap: CGFloat { sectionGap }
-    var bottomGap: CGFloat { sectionGap }
     var flowY: CGFloat { summaryY + summaryHeight + summaryToFlowGap }
-    var totalHeight: CGFloat { flowY + flowHeight + bottomGap }
+    var totalHeight: CGFloat { flowY + flowHeight + Self.bottomGap }
 }
 
 // Measure the data groups, then fit the diagram between the outer margins.
