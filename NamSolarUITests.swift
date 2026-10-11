@@ -144,13 +144,15 @@ final class NamSolarUITests: XCTestCase {
             XCTAssertTrue(button.isHittable)
             XCTAssertTrue(label.exists)
             XCTAssertEqual(label.label, title)
-            XCTAssertGreaterThanOrEqual(label.frame.height, 12)
-            XCTAssertLessThanOrEqual(label.frame.height, 14, "Use smaller, single-line tab labels")
+            XCTAssertEqual(button.staticTexts.matching(identifier: "tab-label-" + icon).count, 1)
             XCTAssertEqual(button.frame.height, 58, accuracy: 1)
-            // Accessibility button frames round through Float; text frames retain Double precision.
+            // contentShape gives AX children the full hit rectangle, not the rendered glyph bounds.
+            // Font size and unscaled text width are checked independently in SolarNavigationTests.
+            XCTAssertGreaterThanOrEqual(label.frame.minY + 0.01, button.frame.minY)
+            XCTAssertLessThanOrEqual(label.frame.maxY, button.frame.maxY + 0.01)
             XCTAssertGreaterThanOrEqual(label.frame.minX + 0.01, button.frame.minX)
             XCTAssertLessThanOrEqual(label.frame.maxX, button.frame.maxX + 0.01)
-            XCTAssertGreaterThan(label.frame.minX, lastFrame.maxX)
+            XCTAssertGreaterThanOrEqual(label.frame.minX + 0.01, lastFrame.maxX)
             lastFrame = label.frame
         }
         saveScreenshot("NamSolar-approved-header-logo-smaller-tabs")
