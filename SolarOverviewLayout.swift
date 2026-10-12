@@ -1,27 +1,27 @@
 import SwiftUI
 
 struct SolarOverviewMetrics {
-    static let topGap: CGFloat = 6
-    static let groupGap: CGFloat = 5
+    static let preferredSectionGap: CGFloat = 20
+    static let minimumStatusClearance: CGFloat = 1
     static let bottomGap: CGFloat = 16
     static let minimumFlowHeight: CGFloat = 300
 
     let summaryHeight: CGFloat
     let statusHeight: CGFloat
+    let sectionGap: CGFloat
     let flowHeight: CGFloat
 
     init(viewportHeight: CGFloat, summaryHeight: CGFloat, statusHeight: CGFloat) {
         self.summaryHeight = summaryHeight
         self.statusHeight = statusHeight
-        let sectionGap = Self.topGap + statusHeight + Self.groupGap
+        // Keep 20pt normally; unusually tall status text must never overlap the cards.
+        sectionGap = max(Self.preferredSectionGap, statusHeight + 2 * Self.minimumStatusClearance)
         let fixedHeight = 2 * sectionGap + summaryHeight + Self.bottomGap
         flowHeight = max(Self.minimumFlowHeight, viewportHeight - fixedHeight)
     }
 
-    var statusY: CGFloat { Self.topGap }
-    var summaryY: CGFloat { statusY + statusHeight + Self.groupGap }
-    // Match the upper status band and card-to-diagram gap, keeping the old footer inset.
-    var sectionGap: CGFloat { summaryY }
+    var statusY: CGFloat { (sectionGap - statusHeight) / 2 }
+    var summaryY: CGFloat { sectionGap }
     var summaryToFlowGap: CGFloat { sectionGap }
     var flowY: CGFloat { summaryY + summaryHeight + summaryToFlowGap }
     var totalHeight: CGFloat { flowY + flowHeight + Self.bottomGap }

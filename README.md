@@ -1,5 +1,11 @@
 # Nam Solar for iPhone
 
+Version 1.4.9 / build 20 sets the two upper overview bands to 20pt, with the
+clock/date/grid-status centered inside the first band. The bottom margin stays
+at 16pt. Unusually tall status content can expand both upper bands equally to
+avoid overlap. Header, fonts, data, artwork and minimum diagram size are unchanged.
+Small viewports scroll rather than clip devices. Android is unchanged.
+
 Version 1.4.8 / build 19 reduces the two upper overview gaps: toolbar-to-cards
 (including clock/date/grid status) and cards-to-diagram. Both follow the measured
 status height, normally about 28pt instead of 36pt. The diagram-to-bottom margin

@@ -2,24 +2,26 @@ import XCTest
 @testable import NamSolar
 
 final class SolarLayoutTests: XCTestCase {
-    func testStatusAboveSummaryWithSmallerEqualUpperGapsAndPreservedBottom() {
+    func testStatusAboveSummaryWith20PointUpperGapsAnd16PointBottom() {
         for summaryHeight in [CGFloat(202), 234, 300] {
             let m = SolarOverviewMetrics(viewportHeight: 763, summaryHeight: summaryHeight, statusHeight: 17)
-            XCTAssertEqual(m.statusY, 6)
-            XCTAssertEqual(m.summaryY - m.statusY - m.statusHeight, 5)
-            XCTAssertEqual(m.summaryY, 28)
+            XCTAssertEqual(m.statusY, 1.5)
+            XCTAssertEqual(m.summaryY - m.statusY - m.statusHeight, 1.5)
+            XCTAssertEqual(m.summaryY, 20)
             XCTAssertEqual(m.flowY - m.summaryY - m.summaryHeight, m.summaryY)
-            XCTAssertEqual(m.flowY, 56 + summaryHeight)
+            XCTAssertEqual(m.flowY, 40 + summaryHeight)
             XCTAssertEqual(m.totalHeight, 763)
             XCTAssertEqual(m.totalHeight - m.flowY - m.flowHeight, 16)
         }
     }
 
     func testChangingStatusHeightKeepsVisibleSectionGapsEqual() {
-        for statusHeight in [CGFloat(0), 17, 29] {
+        for statusHeight in [CGFloat(0), 17, 17.7, 29] {
             for summaryHeight in [CGFloat(202), 234, 300] {
                 let m = SolarOverviewMetrics(viewportHeight: 763, summaryHeight: summaryHeight, statusHeight: statusHeight)
-                XCTAssertEqual(m.summaryY, 11 + statusHeight)
+                XCTAssertEqual(m.summaryY, max(20, statusHeight + 2))
+                XCTAssertEqual(m.statusY, m.summaryY - m.statusY - statusHeight, accuracy: 0.1)
+                XCTAssertGreaterThanOrEqual(m.statusY, 1)
                 XCTAssertEqual(m.flowY - m.summaryY - m.summaryHeight, m.summaryY)
                 XCTAssertEqual(m.summaryToFlowGap, m.summaryY)
                 XCTAssertEqual(SolarOverviewMetrics.bottomGap, 16)
@@ -33,7 +35,7 @@ final class SolarLayoutTests: XCTestCase {
         let m = SolarOverviewMetrics(viewportHeight: 763, summaryHeight: 202, statusHeight: 17)
         XCTAssertEqual(m.totalHeight, 763, accuracy: 0.1)
         XCTAssertEqual(m.flowY + m.flowHeight, 747, accuracy: 0.1)
-        XCTAssertEqual(SolarOverviewMetrics.topGap, 6)
+        XCTAssertEqual(SolarOverviewMetrics.preferredSectionGap, 20)
         XCTAssertEqual(SolarOverviewMetrics.bottomGap, 16)
     }
 
@@ -62,7 +64,7 @@ final class SolarLayoutTests: XCTestCase {
 
     func testLargerSummaryKeepsMinimumDiagramSizeOnCompactScreens() {
         let m = SolarOverviewMetrics(viewportHeight: 598, summaryHeight: 234, statusHeight: 17)
-        XCTAssertEqual(m.totalHeight, 606, accuracy: 0.1)
+        XCTAssertEqual(m.totalHeight, 598, accuracy: 0.1)
         XCTAssertGreaterThanOrEqual(m.flowHeight, 300)
         let preview = SolarOverviewMetrics(viewportHeight: 598, summaryHeight: 254, statusHeight: 17)
         XCTAssertEqual(preview.flowHeight, 300)

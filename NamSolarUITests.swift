@@ -178,7 +178,7 @@ final class NamSolarUITests: XCTestCase {
         let footer = app.staticTexts["app-version-footer"]
         for _ in 0..<8 { if footer.isHittable { break }; app.swipeUp() }
         XCTAssertTrue(footer.isHittable)
-        XCTAssertTrue(footer.label.contains("Nam Solar 1.4.8 (19)"))
+        XCTAssertTrue(footer.label.contains("Nam Solar 1.4.9 (20)"))
         XCTAssertFalse(footer.label.contains("Nam Solar 1.1 "))
         saveScreenshot("NamSolar-current-version-footer")
     }
@@ -215,14 +215,13 @@ final class NamSolarUITests: XCTestCase {
         XCTAssertEqual(app.descendants(matching: .any).matching(identifier: "overview-status").count, 1)
         let navigationBottom = app.buttons["Tổng quan"].frame.maxY
         let statusGap = status.frame.minY - navigationBottom
-        XCTAssertGreaterThanOrEqual(statusGap, 4, "Status needs breathing room below navigation")
-        XCTAssertLessThanOrEqual(statusGap, 11, "Keep the status band more compact")
+        XCTAssertGreaterThanOrEqual(statusGap, 0, "Status must remain below navigation")
+        XCTAssertLessThanOrEqual(statusGap, 6, "Center the readable status inside the 20-point band")
         let summary = app.descendants(matching: .any)["daily-summary"].firstMatch
         XCTAssertTrue(summary.exists)
-        // AX card bounds begin inside its existing 7-point top padding.
-        let summaryGap = pvTile.frame.minY - 7 - status.frame.maxY
-        XCTAssertGreaterThanOrEqual(summaryGap, 3, "Status must precede the daily cards")
-        XCTAssertLessThanOrEqual(summaryGap, 10, "The status row must not add a large empty band")
+        let summaryGap = summary.frame.minY - status.frame.maxY
+        XCTAssertGreaterThanOrEqual(summaryGap, 0, "Status must not overlap the daily cards")
+        XCTAssertLessThanOrEqual(summaryGap, 6, "Center the readable status inside the 20-point band")
         Thread.sleep(forTimeInterval: 2.5)
         XCTAssertTrue(status.isHittable)
         XCTAssertLessThan(status.frame.maxY, pvTile.frame.minY)
@@ -233,8 +232,8 @@ final class NamSolarUITests: XCTestCase {
         let lowerGap = flow.frame.minY - summary.frame.maxY
         print("OVERVIEW GAPS toolbarBottom=\(navigationBottom) summary=\(summary.frame) flow=\(flow.frame) upper=\(upperGap) lower=\(lowerGap)")
         XCTAssertEqual(upperGap, lowerGap, accuracy: 1, "Toolbar-to-cards and cards-to-diagram gaps must match")
-        XCTAssertGreaterThanOrEqual(lowerGap, 24, "Leave room for the readable clock/date band")
-        XCTAssertLessThanOrEqual(lowerGap, 32, "Section gaps must be smaller than the previous 36-point band")
+        XCTAssertEqual(upperGap, 20, accuracy: 1, "The complete toolbar-to-cards band must be 20 points")
+        XCTAssertEqual(lowerGap, 20, accuracy: 1, "The card-to-diagram gap must be 20 points")
         saveScreenshot("NamSolar-overview-equal-gaps-before-scroll")
         XCTAssertGreaterThanOrEqual(pvTile.frame.height, 54, "Larger metric type and row spacing must be retained")
         XCTAssertGreaterThanOrEqual(summary.frame.height, 215, "Summary cards must have more visual weight")
