@@ -534,11 +534,27 @@ final class NamSolarUITests: XCTestCase {
         for _ in 0..<5 { if table.isHittable { break }; app.swipeUp() }
         XCTAssertTrue(table.isHittable)
         table.tap()
-        let drill = app.buttons.matching(NSPredicate(format: "label == %@", "Xem ngày")).firstMatch
+        let drill = app.buttons.matching(NSPredicate(format: "label == %@", "Xem ngày")).element(boundBy: 0)
         XCTAssertTrue(drill.waitForExistence(timeout: 5))
-        if !drill.isHittable { app.swipeUp() }
-        XCTAssertTrue(drill.isHittable)
-        drill.tap()
+        let window = app.windows.firstMatch
+        let contentTop = app.buttons["Lịch sử"].frame.maxY + 8
+        for _ in 0..<6 {
+            let frame = drill.frame
+            if frame.minY >= contentTop && frame.maxY <= window.frame.maxY - 8 { break }
+            if frame.minY < contentTop { app.swipeDown() } else { app.swipeUp() }
+        }
+        let drillFrame = drill.frame
+        XCTAssertEqual(drill.label, "Xem ngày")
+        XCTAssertGreaterThan(drillFrame.width, 0)
+        XCTAssertLessThan(drillFrame.width, 120, "Target the row button, not the whole disclosure group")
+        XCTAssertLessThan(drillFrame.height, 44)
+        XCTAssertGreaterThanOrEqual(drillFrame.minY, contentTop)
+        XCTAssertLessThanOrEqual(drillFrame.maxY, window.frame.maxY - 8)
+        saveScreenshot("NamSolar-energy-visible-day-drilldown-target")
+        // SwiftUI propagates the disclosure ID to children; use the visible leaf's snapshot frame.
+        window.coordinate(withNormalizedOffset: CGVector(dx: 0, dy: 0))
+            .withOffset(CGVector(dx: drillFrame.midX - window.frame.minX,
+                                 dy: drillFrame.midY - window.frame.minY)).tap()
         XCTAssertTrue(app.staticTexts["Điện năng từng giờ"].waitForExistence(timeout: 5))
         // A single-day selection must not retain totals from the previous seven-day range.
         XCTAssertFalse(app.staticTexts["energy-loaded-range"].label.contains(" – "))
