@@ -1,5 +1,10 @@
 # Nam Solar for iPhone
 
+Version 1.4.10 / build 21 reduces only the daily-card-to-diagram gap to 12pt.
+The top clock/date/status band stays at 20pt and the bottom margin at 16pt.
+Tall status content can expand the top band without changing the 12pt diagram
+gap. Header, fonts, data, artwork, minimum diagram size and Android are unchanged.
+
 Version 1.4.9 / build 20 sets the two upper overview bands to 20pt, with the
 clock/date/grid-status centered inside the first band. The bottom margin stays
 at 16pt. Unusually tall status content can expand both upper bands equally to

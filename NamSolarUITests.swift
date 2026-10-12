@@ -178,7 +178,7 @@ final class NamSolarUITests: XCTestCase {
         let footer = app.staticTexts["app-version-footer"]
         for _ in 0..<8 { if footer.isHittable { break }; app.swipeUp() }
         XCTAssertTrue(footer.isHittable)
-        XCTAssertTrue(footer.label.contains("Nam Solar 1.4.9 (20)"))
+        XCTAssertTrue(footer.label.contains("Nam Solar 1.4.10 (21)"))
         XCTAssertFalse(footer.label.contains("Nam Solar 1.1 "))
         saveScreenshot("NamSolar-current-version-footer")
     }
@@ -231,10 +231,10 @@ final class NamSolarUITests: XCTestCase {
         let upperGap = summary.frame.minY - navigationBottom
         let lowerGap = flow.frame.minY - summary.frame.maxY
         print("OVERVIEW GAPS toolbarBottom=\(navigationBottom) summary=\(summary.frame) flow=\(flow.frame) upper=\(upperGap) lower=\(lowerGap)")
-        XCTAssertEqual(upperGap, lowerGap, accuracy: 1, "Toolbar-to-cards and cards-to-diagram gaps must match")
+        XCTAssertEqual(upperGap - lowerGap, 8, accuracy: 1, "Only the diagram gap must shrink by 8 points")
         XCTAssertEqual(upperGap, 20, accuracy: 1, "The complete toolbar-to-cards band must be 20 points")
-        XCTAssertEqual(lowerGap, 20, accuracy: 1, "The card-to-diagram gap must be 20 points")
-        saveScreenshot("NamSolar-overview-equal-gaps-before-scroll")
+        XCTAssertEqual(lowerGap, 12, accuracy: 1, "The card-to-diagram gap must be 12 points")
+        saveScreenshot("NamSolar-overview-20-12-16-before-scroll")
         XCTAssertGreaterThanOrEqual(pvTile.frame.height, 54, "Larger metric type and row spacing must be retained")
         XCTAssertGreaterThanOrEqual(summary.frame.height, 215, "Summary cards must have more visual weight")
         XCTAssertLessThanOrEqual(flow.frame.height, summary.frame.height * 2.25, "Diagram must not stretch disproportionately below the summary")
